@@ -79,7 +79,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
       this.selectorStopWatches.get(componentInstance).push(
         watch(
           () => selector,
-          () => (componentInstance[selectorName] = selector),
+          () => (componentInstance[selectorName] = selector.value),
           {
             deep: true
           }

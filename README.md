@@ -1,3 +1,3 @@
-# Universal Model React
+# Universal Model Angular
 
 

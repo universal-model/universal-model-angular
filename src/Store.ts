@@ -48,7 +48,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  startUsingState(componentInstance: any, subStateMap: object): void {
+  useState(componentInstance: any, subStateMap: object): void {
     this.stateStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,15 +63,18 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
         )
       );
     });
+
+    const originalOnDestroy = componentInstance.ngOnDestroy;
+    componentInstance.ngOnDestroy = () => {
+      this.stateStopWatches.get(componentInstance).forEach((stopWatch: StopHandle) => stopWatch());
+      if (originalOnDestroy) {
+        originalOnDestroy();
+      }
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stopUsingState(componentInstance: any): void {
-    this.stateStopWatches.get(componentInstance).forEach((stopWatch: StopHandle) => stopWatch());
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  startUsingSelectors(componentInstance: any, selectorMap: object): void {
+  useSelectors(componentInstance: any, selectorMap: object): void {
     this.selectorStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,10 +89,13 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
         )
       );
     });
-  }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stopUsingSelectors(componentInstance: any): void {
-    this.selectorStopWatches.get(componentInstance).forEach((stopWatch: StopHandle) => stopWatch());
+    const originalOnDestroy = componentInstance.ngOnDestroy;
+    componentInstance.ngOnDestroy = () => {
+      this.selectorStopWatches.get(componentInstance).forEach((stopWatch: StopHandle) => stopWatch());
+      if (originalOnDestroy) {
+        originalOnDestroy();
+      }
+    };
   }
 }

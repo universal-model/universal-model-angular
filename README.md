@@ -47,6 +47,8 @@ Use state and selectors in Views
       subState1: typeof initialSubState1;
       prop1: string;
       prop2: number;
+      selector1: string;
+      selector2: string;
     
       constructor() {
         const { subState1, subState2: { prop1 }, subState3: { prop1: myProp } } = store.getState();
@@ -88,67 +90,61 @@ Use state and selectors in Views
 
 ## View
 
-TodoListView.tsx
+todolist.component.ts
 
-    import * as React from 'react';
-    import { useEffect } from 'react';
-    import store from '../../store/store';
-    import { Todo } from '../model/state/initialTodoListState';
-    import removeTodo from '../model/actions/removeTodo';
-    import fetchTodos from '../model/actions/fetchTodos';
-    import todoListController from '../controller/todoListController';
-    import toggleIsDoneTodo from '../model/actions/toggleIsDoneTodo';
-    import toggleShouldShowOnlyUnDoneTodos from '../model/actions/toggleShouldShowOnlyUnDoneTodos';
-
-    const TodoListView = () => {
-      const [{ todosState }, { shownTodos }] = store.getStateAndSelectors();
-      store.useStateAndSelectors([todosState], [shownTodos]);
-
-      useEffect(() => {
+    import { Component, OnDestroy, OnInit } from '@angular/core';
+    import initialTodosState, { Todo } from '@/todolist/model/state/initialTodosState';
+    import toggleShouldShowOnlyDoneTodos from '@/todolist/model/actions/toggleShouldShowOnlyUnDoneTodos';
+    import toggleIsDoneTodo from '@/todolist/model/actions/toggleIsDoneTodo';
+    import removeTodo from '@/todolist/model/actions/removeTodo';
+    import store from '@/store/store';
+    import fetchTodos from '@/todolist/model/actions/fetchTodos';
+    import todoListController from '@/todolist/controller/todoListController';
+    
+    @Component({
+      selector: 'app-todo-list-view',
+      template: `
+        <div>
+          <input
+            id="shouldShowOnlyUnDoneTodos"
+            type="checkbox"
+            [checked]="todosState.shouldShowOnlyUnDoneTodos"
+            (click)="toggleShouldShowOnlyUnDoneTodos()"
+          />
+          <label for="shouldShowOnlyUnDoneTodos">Show only undone todos</label>
+          <ul>
+            <li *ngFor="let todo of shownTodos">
+              <input id="todo.name" type="checkbox" [checked]="todo.isDone" (click)="toggleIsDoneTodo(todo)" />
+              <label for="todo.name">{{ todo.name }}</label>
+              <button (click)="removeTodo(todo)">Remove</button>
+            </li>
+          </ul>
+        </div>
+      `,
+      styleUrls: []
+    })
+    export class TodoListComponent implements OnInit, OnDestroy {
+      todosState = initialTodosState;
+      shownTodos = [] as Todo[];
+      toggleShouldShowOnlyUnDoneTodos = toggleShouldShowOnlyDoneTodos;
+      toggleIsDoneTodo = toggleIsDoneTodo;
+      removeTodo = removeTodo;
+    
+      constructor() {
+        const [{ todosState }, { shownTodos }] = store.getStateAndSelectors();
+        store.useStateAndSelectors(this, { todosState }, { shownTodos });
+      }
+    
+      ngOnInit(): void {
         // noinspection JSIgnoredPromiseFromCall
         fetchTodos();
         document.addEventListener('keypress', todoListController.handleKeyPress);
-        return () => document.removeEventListener('keypress', todoListController.handleKeyPress);
-      }, []);
-
-      let todoListContent;
-
-      if (todosState.isFetchingTodos) {
-        todoListContent = <div>Fetching todos...</div>;
-      } else if (todosState.hasTodosFetchFailure) {
-        todoListContent = <div>Failed to fetch todos</div>;
-      } else {
-        const todoListItems = shownTodos.value.map((todo: Todo, index: number) => (
-          <li key={todo.id}>
-            <input
-              id={todo.name}
-              type="checkbox"
-              defaultChecked={todo.isDone}
-              onChange={() => toggleIsDoneTodo(todo)}
-            />
-            <label>{todo.name}</label>
-            <button onClick={() => removeTodo(todo)}>Remove</button>
-          </li>
-        ));
-
-        todoListContent = <ul>{todoListItems}</ul>;
       }
-
-      return (
-        <div>
-          <input
-            id="shouldShowOnlyDoneTodos"
-            type="checkbox"
-            defaultChecked={todosState.shouldShowOnlyUnDoneTodos}
-            onChange={toggleShouldShowOnlyUnDoneTodos}
-          />
-          <label>Show only undone todos</label>
-          {todoListContent}
-        </div>
-      );
-    };
-
-    export default TodoListView;
+    
+      ngOnDestroy(): void {
+        document.removeEventListener('keypress', todoListController.handleKeyPress);
+      }
+    }
 
 ## Controller
 
@@ -173,7 +169,7 @@ todoListController.ts
 
 store.ts
 
-    import { createStore } from 'universal-model-react';
+    import { createStore } from 'universal-model-angular';
     import initialTodoListState from '@/todolist/model/state/initialTodoListState';
     import createTodoListStateSelectors from '@/todolist/model/state/createTodoListStateSelectors';
 
@@ -344,7 +340,7 @@ fetchTodos.ts
 
 ### Full Example
 
-https://github.com/universal-model/universal-model-react-todo-app
+https://github.com/universal-model/universal-model-angular-todo-app
 
 ### License
 

@@ -51,6 +51,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
     return [this.reactiveState, this.reactiveSelectors];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useStateAndSelectors(componentInstance: any, subStateMap: object, selectorMap: object): void {
     this.useState(componentInstance, subStateMap);
     this.useSelectors(componentInstance, selectorMap);

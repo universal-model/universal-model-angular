@@ -52,17 +52,27 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useStateAndSelectors(componentInstance: any, subStateMap: object, selectorMap: object): void {
+  useStateAndSelectors(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    componentInstance: any,
+    subStateMap: { [key: string]: object },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selectorMap: { [key: string]: ComputedRef<any> }
+  ): void {
     this.useState(componentInstance, subStateMap);
     this.useSelectors(componentInstance, selectorMap);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useState(componentInstance: any, subStateMap: object): void {
+  useState(componentInstance: any, subStateMap: { [key: string]: object }): void {
     this.stateStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.entries(subStateMap).forEach(([stateName, subState]: [string, any]) => {
+      if (!Object.getOwnPropertySymbols(subState)[0]) {
+        throw new Error('useState: One of given subStates is not subState');
+      }
+
       this.stateStopWatches.get(componentInstance).push(
         watch(
           () => subState,
@@ -84,7 +94,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useSelectors(componentInstance: any, selectorMap: object): void {
+  useSelectors(componentInstance: any, selectorMap: { [key: string]: ComputedRef<any> }): void {
     this.selectorStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

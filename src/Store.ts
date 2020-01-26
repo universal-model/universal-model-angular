@@ -54,7 +54,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useStateAndSelectors(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    componentInstance: { [ key: string ]: any },
+    componentInstance: { [key: string]: any },
     subStateMap: { [key: string]: object },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectorMap: { [key: string]: ComputedRef<any> }
@@ -64,7 +64,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useState(componentInstance: { [ key: string ]: any }, subStateMap: { [key: string]: object }): void {
+  useState(componentInstance: { [key: string]: any }, subStateMap: { [key: string]: object }): void {
     this.stateStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

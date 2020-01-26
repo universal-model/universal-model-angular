@@ -98,7 +98,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
     this.selectorStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Object.entries(selectorMap).forEach(([selectorName, selector]: [string, any]) => {
+    Object.entries(selectorMap).forEach(([selectorName, selector]: [string, ComputedRef<any>]) => {
       this.selectorStopWatches.get(componentInstance).push(
         watch(
           () => selector,

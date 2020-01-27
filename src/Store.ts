@@ -1,7 +1,8 @@
 import { Ref, UnwrapRef, reactive, watch, StopHandle, ComputedRef, computed } from 'vue';
+import { SubStateFlagWrapper } from './createSubState';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type State = { [key: string]: any };
+export type SubState = Omit<object, '__isSubState__'> & SubStateFlagWrapper;
+export type State = { [key: string]: SubState };
 
 export type SelectorsBase<T extends State> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,10 +53,9 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useStateAndSelectors(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    componentInstance: { [key: string]: any },
-    subStateMap: { [key: string]: object },
+  useStateAndSelectors<V extends new (...args: any[]) => any>(
+    componentInstance: InstanceType<V>,
+    subStateMap: { [key: string]: SubState },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectorMap: { [key: string]: ComputedRef<any> }
   ): void {
@@ -64,14 +64,18 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useState(componentInstance: { [key: string]: any }, subStateMap: { [key: string]: object }): void {
+  useState<V extends new (...args: any[]) => any>(
+    componentInstance: InstanceType<V>,
+    subStateMap: { [key: string]: SubState }
+  ): void {
     this.stateStopWatches.set(componentInstance, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Object.entries(subStateMap).forEach(([stateName, subState]: [string, object]) => {
-      if (!Object.getOwnPropertySymbols(subState)[0]) {
+    Object.entries(subStateMap).forEach(([stateName, subState]: [string, SubState]) => {
+      if (!subState.__isSubState__) {
         throw new Error('useState: One of given subStates is not subState');
       }
+
+      componentInstance[stateName] = subState;
 
       this.stateStopWatches.get(componentInstance).push(
         watch(
@@ -94,11 +98,17 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useSelectors(componentInstance: any, selectorMap: { [key: string]: ComputedRef<any> }): void {
+  useSelectors<V extends new (...args: any) => any>(
+    componentInstance: InstanceType<V>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selectorMap: { [key: string]: ComputedRef<any> }
+  ): void {
     this.selectorStopWatches.set(componentInstance, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.entries(selectorMap).forEach(([selectorName, selector]: [string, ComputedRef<any>]) => {
+      componentInstance[selectorName] = selector.value;
+
       this.selectorStopWatches.get(componentInstance).push(
         watch(
           () => selector,

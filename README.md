@@ -38,7 +38,7 @@ Universal model is a model which can be used with any of following UI frameworks
     const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
     
     useState(this, { componentAState });
-    useSelectors(this, {s elector1, selector2 });
+    useSelectors(this, { selector1, selector2 });
     useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
     
 ## API Examples
@@ -79,7 +79,7 @@ call other component's action
       changeComponentBState(newBValue);
     }
 
-**Use actions, state and selectors in Views (React functional components)**
+**Use actions, state and selectors in Views (Angular Components)**
 
 Components should use only their own state and access other components' states using selectors
 provided by those components. This will ensure encapsulation of each component's state.
@@ -88,6 +88,9 @@ provided by those components. This will ensure encapsulation of each component's
       state: typeof initialComponentAState;
       selector1: string,
       selector2: number
+      // Action
+      changeComponentAState = changeComponentAState
+      
       
       constructor() {
         const { componentAState, { selector1, selector2 } = store.getStateAndSelectors();

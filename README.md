@@ -30,35 +30,68 @@ Universal model is a model which can be used with any of following UI frameworks
 - A new view can be created to represent model differently without any changes to model
 
 ## API
-
-Create and export store in store.ts:
-
+    createSubState(subState);
+    const store = createStore(initialState, combineSelectors(selectors))
+    
+    const { componentAState } = store.getState();
+    const { selector1, selector2 } = store.getSelectors();
+    const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
+    
+    useState(this, { componentAState });
+    useSelectors(this, {s elector1, selector2 });
+    useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
+    
+## API Examples
+**Create and export store in store.ts:**
+    
+    const initialState = {
+      componentAState: createSubState(initialComponentAState),
+      componentBState: createSubState(initialComponentBState),
+      .
+      .
+    };
+    
+    export type State = typeof initialState;
+    
+    const selectors = combineSelectors([
+      createComponentAStateSelectors<State>(),
+      createComponentBStateSelectors<State>(),
+      .
+      .
+    ]);
+    
     export default createStore(initialState, selectors);
-
-Access store
-
-    const state = store.getState();
-    const selectors = store.getSelectors();
-    const [state, selectors] = store.getStateAndSelectors();
-
-Use state and selectors in Views
     
-    export class ViewComponent {
-      subState1: typeof initialSubState1;
-      prop1: string;
-      prop2: number;
-      selector1: string;
-      selector2: string;
-    
-      constructor() {
-        const { subState1, subState2: { prop1 }, subState3: { prop1: myProp } } = store.getState();
-        const { selector1, selector2 } = store.getSelectors();
+**Access store in Actions**
 
-        useState(this, { subState1, prop1, myProp });
-        useSelectors(this, {selector1, selector2});
+Don't modify other component's state directly inside action, but instead 
+call other component's action
+
+    export default function changeComponentAAndBState(newAValue, newBValue) {
+      const { componentAState } = store.getState();
+      componentAState.prop1 = newAValue;
       
-        // or alternatively
-        useStateAndSelectors(this, {subState1, prop1, myProp}, [selector1, selector2]);
+      // BAD
+      const { componentBState } = store.getState();
+      componentBState.prop1 = newBValue;
+      
+      // GOOD
+      changeComponentBState(newBValue);
+    }
+
+**Use actions, state and selectors in Views (React functional components)**
+
+Components should use only their own state and access other components' states using selectors
+provided by those components. This will ensure encapsulation of each component's state.
+    
+    export default class AComponent {
+      state: typeof initialComponentAState;
+      selector1: string,
+      selector2: number
+      
+      constructor() {
+        const { componentAState, { selector1, selector2 } = store.getStateAndSelectors();
+        useStateAndSelectors(this, { componentAState: state }, { selector1, selector2 });
       }
     }
 
@@ -69,12 +102,13 @@ Use state and selectors in Views
       |- common
       |  |- component1
       |  |- component2
-      |     .
+      |     |- component2_1
       |     .
       |     .
       |- componentA
       |- componentB
-      |  .
+      |  |- componentB_1
+      |  |- componentB_2
       |  .
       |  .
       |- componentN
@@ -89,6 +123,47 @@ Use state and selectors in Views
 # Example
 
 ## View
+app.component.ts
+
+    import { Component } from '@angular/core';
+    
+    @Component({
+      selector: 'app-root',
+      template: `
+        <app-header-view></app-header-view>
+        <app-todo-list-view></app-todo-list-view>
+      `,
+      styleUrls: []
+    })
+    export class AppComponent {}
+
+header.component.ts
+
+    import { Component } from '@angular/core';
+    import initialHeaderState from '@/header/model/state/initialHeaderState';
+    import changeUserName from '@/header/model/actions/changeUserName';
+    import store from '@/store/store';
+    
+    @Component({
+      selector: 'app-header-view',
+      template: `
+        <div>
+          <h1>{{ headerState.userName }}</h1>
+          <label for="userName">User name:</label>
+          <input #userNameInput id="userName" (change)="changeUserName(userNameInput.value)" />
+        </div>
+      `,
+      styleUrls: []
+    })
+    export class HeaderComponent {
+      headerState: typeof initialHeaderState;
+      changeUserName = changeUserName;
+    
+      constructor() {
+        const { headerState } = store.getState();
+        store.useState(this, { headerState });
+      }
+    }
 
 todolist.component.ts
 
@@ -112,27 +187,32 @@ todolist.component.ts
             (click)="toggleShouldShowOnlyUnDoneTodos()"
           />
           <label for="shouldShowOnlyUnDoneTodos">Show only undone todos</label>
-          <ul>
-            <li *ngFor="let todo of shownTodos">
-              <input id="todo.name" type="checkbox" [checked]="todo.isDone" (click)="toggleIsDoneTodo(todo)" />
-              <label for="todo.name">{{ todo.name }}</label>
-              <button (click)="removeTodo(todo)">Remove</button>
-            </li>
-          </ul>
+          <div *ngIf="todosState.isFetchingTodos">Fetching todos...</div>
+          <div *ngIf="todosState.hasTodosFetchFailure; else todoList">Failed to fetch todos</div>
+          <ng-template #todoList>
+            <ul>
+              <li *ngFor="let todo of shownTodos">
+                <input id="todo.name" type="checkbox" [checked]="todo.isDone" (click)="toggleIsDoneTodo(todo)" />
+                <label for="todo.name">{{ userName }}: {{ todo.name }}</label>
+                <button (click)="removeTodo(todo)">Remove</button>
+              </li>
+            </ul>
+          </ng-template>
         </div>
       `,
       styleUrls: []
     })
     export class TodoListComponent implements OnInit, OnDestroy {
-      todosState = initialTodosState;
-      shownTodos = [] as Todo[];
+      todosState: typeof initialTodosState;
+      shownTodos: Todo[];
+      userName: string;
       toggleShouldShowOnlyUnDoneTodos = toggleShouldShowOnlyDoneTodos;
       toggleIsDoneTodo = toggleIsDoneTodo;
       removeTodo = removeTodo;
     
       constructor() {
-        const [{ todosState }, { shownTodos }] = store.getStateAndSelectors();
-        store.useStateAndSelectors(this, { todosState }, { shownTodos });
+        const [{ todosState }, { shownTodos, userName }] = store.getStateAndSelectors();
+        store.useStateAndSelectors(this, { todosState }, { shownTodos, userName });
       }
     
       ngOnInit(): void {
@@ -145,6 +225,7 @@ todolist.component.ts
         document.removeEventListener('keypress', todoListController.handleKeyPress);
       }
     }
+
 
 ## Controller
 
@@ -169,32 +250,35 @@ todoListController.ts
 
 store.ts
 
-    import { createStore } from 'universal-model-angular';
-    import initialTodoListState from '@/todolist/model/state/initialTodoListState';
-    import createTodoListStateSelectors from '@/todolist/model/state/createTodoListStateSelectors';
-
-    const initialState = {
-      todosState: initialTodosState,
-      otherState: initialOtherState,
-      .
-      .
-    };
-
-    export type State = typeof initialState;
-
-    const selectors = {
-      ...createTodosStateSelectors<State>(),
-      ...createOtherStateSelectors<State>(),
-      .
-      .
-
-    };
-
-    export default createStore(initialState, selectors);
+     import { combineSelectors, createStore, createSubState } from 'universal-model-angular';
+     import initialHeaderState from '@/header/model/state/initialHeaderState';
+     import initialTodoListState from '@/todolist/model/state/initialTodosState';
+     import createTodoListStateSelectors from '@/todolist/model/state/createTodoListStateSelectors';
+     import createHeaderStateSelectors from '@/header/model/state/createHeaderStateSelectors';
+     
+     const initialState = {
+       headerState: createSubState(initialHeaderState),
+       todosState: createSubState(initialTodoListState)
+     };
+     
+     export type State = typeof initialState;
+     
+     const selectors = combineSelectors([
+       createTodoListStateSelectors<State>(),
+       createHeaderStateSelectors<State>()
+     ]);
+     
+     export default createStore(initialState, selectors);
 
 ### State
 
 #### Initial state
+
+initialHeaderState.ts
+
+    export default {
+      userName: 'John'
+    };
 
 initialTodoListState.ts
 
@@ -212,6 +296,16 @@ initialTodoListState.ts
     };
 
 #### State selectors
+
+createHeaderStateSelectors.ts
+
+    import { State } from '@/store/store';
+    
+    const createHeaderStateSelectors = <T extends State>() => ({
+      userName: (state: T) => state.headerState.userName
+    });
+    
+    export default createHeaderStateSelectors;
 
 createTodoListStateSelectors.ts
 
@@ -269,6 +363,15 @@ todoService.ts
     export default new FakeTodoService();
 
 ### Actions
+
+changeUserName.ts
+
+    import store from '@/store/store';
+    
+    export default function changeUserName(newUserName: string): void {
+      const { headerState } = store.getState();
+      headerState.userName = newUserName;
+    }
 
 addTodo.ts
 

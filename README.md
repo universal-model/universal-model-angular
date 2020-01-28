@@ -29,6 +29,34 @@ Universal model is a model which can be used with any of following UI frameworks
 - There can be multiple interchangable views that use same part of model
 - A new view can be created to represent model differently without any changes to model
 
+## Clean UI Code directory layout
+
+    - src
+      |
+      |- common
+      |  |- component1
+      |  |- component2
+      |     |- component2_1
+      |     .
+      |     .
+      |- componentA
+      |- componentB
+      |  |- componentB_1
+      |  |- componentB_2
+      |- componentC
+      |  |- view
+      |  .
+      |  .
+      |- componentN
+      |  |- controller
+      |  |- model
+      |  |  |- actions
+      |  |  |- services
+      |  |  |- state
+      |  |- view
+      |- store
+
+
 ## API
     createSubState(subState);
     const store = createStore(initialState, combineSelectors(selectors))
@@ -46,7 +74,11 @@ Universal model is a model which can be used with any of following UI frameworks
     
     const initialState = {
       componentAState: createSubState(initialComponentAState),
+      
       componentBState: createSubState(initialComponentBState),
+      componentB_1State: createSubState(initialComponentB_1State),
+      component1ForComponentBState: createSubState(initialComponent1State),
+      component2ForComponentBState: createSubState(initialComponent2State),
       .
       .
     };
@@ -56,16 +88,59 @@ Universal model is a model which can be used with any of following UI frameworks
     const selectors = combineSelectors([
       createComponentAStateSelectors<State>(),
       createComponentBStateSelectors<State>(),
+      createComponentB_1StateSelectors<State>(),
+      createComponent1Selectors<State>('componentB');
+      createComponent2Selectors<State>('componentB');
       .
       .
     ]);
     
     export default createStore(initialState, selectors);
     
+in large projects you should have sub stores for components and these sub store are combined 
+together to a single store in store.js:
+
+componentBStore.js
+
+    const componentBnitialState = { 
+      componentBState: createSubState(initialComponentBState),
+      componentB_1State: createSubState(initialComponentB_1State),
+      component1ForComponentBState: createSubState(initialComponent1State),
+      component2ForComponentBState: createSubState(initialComponent2State),  
+    };
+    
+    const componentBSelectors = combineSelectors([
+      createComponentBStateSelectors<State>(),
+      createComponentB_1StateSelectors<State>(),
+      createComponent1Selectors<State>('componentB');
+      createComponent2Selectors<State>('componentB');
+    ]);
+    
+store.js
+
+    const initialState = {
+       ...componentAInitialState,
+       ...componentBInitialState,
+       .
+       .
+       ...componentNInitialState
+    };
+          
+    export type State = typeof initialState;
+        
+    const selectors = combineSelectors([
+      componentASelectors,
+      componentBSelectors,
+      ...
+      componentNSelectors
+    ]);
+        
+    export default createStore(initialState, selectors);
+    
 **Access store in Actions**
 
 Don't modify other component's state directly inside action, but instead 
-call other component's action
+call other component's action. This will ensure encapsulation of component's own state.
 
     export default function changeComponentAAndBState(newAValue, newBValue) {
       const { componentAState } = store.getState();
@@ -98,31 +173,6 @@ provided by those components. This will ensure encapsulation of each component's
       }
     }
 
-## Clean UI Code directory layout
-
-    - src
-      |
-      |- common
-      |  |- component1
-      |  |- component2
-      |     |- component2_1
-      |     .
-      |     .
-      |- componentA
-      |- componentB
-      |  |- componentB_1
-      |  |- componentB_2
-      |  .
-      |  .
-      |- componentN
-      |  |- controller
-      |  |- model
-      |  |  |- actions
-      |  |  |- services
-      |  |  |- state
-      |  |- view
-      |- store
-
 # Example
 
 ## View
@@ -151,7 +201,7 @@ header.component.ts
       selector: 'app-header-view',
       template: `
         <div>
-          <h1>{{ headerState.userName }}</h1>
+          <h1>{{ headerText }}</h1>
           <label for="userName">User name:</label>
           <input #userNameInput id="userName" (change)="changeUserName(userNameInput.value)" />
         </div>
@@ -159,12 +209,12 @@ header.component.ts
       styleUrls: []
     })
     export class HeaderComponent {
-      headerState: typeof initialHeaderState;
+      headerText: string;
       changeUserName = changeUserName;
     
       constructor() {
-        const { headerState } = store.getState();
-        store.useState(this, { headerState });
+        const { headerText } = store.getSelectors();
+        store.useSelectors(this, { headerText });
       }
     }
 
@@ -305,7 +355,12 @@ createHeaderStateSelectors.ts
     import { State } from '@/store/store';
     
     const createHeaderStateSelectors = <T extends State>() => ({
-      userName: (state: T) => state.headerState.userName
+      userName: (state: T) => state.headerState.userName,
+      headerText: (state: T) => {
+          const unDoneTodoCount = state.todosState.todos.filter((todo: Todo) => !todo.isDone).length;
+          const todoCount = state.todosState.todos.length;
+          return `${state.headerState.userName} (${unDoneTodoCount}/${todoCount})`;
+        }
     });
     
     export default createHeaderStateSelectors;

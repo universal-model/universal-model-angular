@@ -72,10 +72,10 @@ Universal model is a model which can be used with any of following UI frameworks
 ## API Examples
 **Create initial states**
 
-    const initialComponentAState: {
+    const initialComponentAState = {
       prop1: 0,
       prop2: 0
-    }
+    };
     
 **Create selectors**
 

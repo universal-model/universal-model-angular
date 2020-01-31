@@ -37,9 +37,9 @@ Universal model is a model which can be used with any of following UI frameworks
       |- common
       |  |- component1
       |  |- component2
-      |     |- component2_1
-      |     .
-      |     .
+      |  .  |- component2_1
+      |  .  .
+      |  .  .
       |- componentA
       |- componentB
       |  |- componentB_1
@@ -79,6 +79,10 @@ Universal model is a model which can be used with any of following UI frameworks
     };
     
 **Create selectors**
+
+When using foreign state inside selectors, prefer creating foreign state selectors and accessing foreign
+state through them instead of directly accessing foreign state inside selector. This will ensure  better
+encapsulation of component state.
 
     const createComponentASelectors = <T extends State>() => ({
       selector1: (state: State) => state.componentAState.prop1  + state.componentAState.prop2
@@ -137,11 +141,11 @@ componentBStore.js
 store.js
 
     const initialState = {
-       ...componentAInitialState,
-       ...componentBInitialState,
-       .
-       .
-       ...componentNInitialState
+      ...componentAInitialState,
+      ...componentBInitialState,
+      .
+      .
+      ...componentNInitialState
     };
           
     export type State = typeof initialState;
@@ -183,7 +187,6 @@ provided by those components. This will ensure encapsulation of each component's
       selector2: number
       // Action
       changeComponentAState = changeComponentAState
-      
       
       constructor() {
         const { componentAState, { selector1, selector2 } = store.getStateAndSelectors();
@@ -296,7 +299,6 @@ todolist.component.ts
         document.removeEventListener('keypress', todoListController.handleKeyPress);
       }
     }
-
 
 ## Controller
 
@@ -416,9 +418,9 @@ ITodoService.ts
 
 FakeTodoService.ts
 
-    import { ITodoService } from './ITodoService';
-    import { Todo } from '../state/initialTodoListState';
-    import Constants from '../../../Constants';
+    import { ITodoService } from '@/todolist/model/services/ITodoService';
+    import { Todo } from '@/todolist/model/state/initialTodoListState';
+    import Constants from '@/Constants';
     
     export default class FakeTodoService implements ITodoService {
       tryFetchTodos(): Promise<Todo[]> {
@@ -456,7 +458,7 @@ changeUserName.ts
 
 addTodo.ts
 
-    import store from '../../../store/store';
+    import store from '@/store/store';
     
     let id = 3;
     
@@ -513,13 +515,13 @@ fetchTodos.ts
       todosState.isFetchingTodos = true;
       todosState.hasTodosFetchFailure = false;
 
-        try {
-          todosState.todos = await todoService.tryFetchTodos();
-        } catch (error) {
-          todosState.hasTodosFetchFailure = true;
-        }
+      try {
+        todosState.todos = await todoService.tryFetchTodos();
+      } catch (error) {
+        todosState.hasTodosFetchFailure = true;
+      }
 
-        todosState.isFetchingTodos = false;
+      todosState.isFetchingTodos = false;
     }
 
 ### Full Example

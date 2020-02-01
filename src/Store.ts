@@ -87,7 +87,6 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
                 Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   ([key, value]: [string, any]) => {
-                    console.log(key, value);
                     componentInstance[key] = value;
                   }
                 );
@@ -139,7 +138,6 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
                 Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   ([key, value]: [string, any]) => {
-                    console.log(key, value);
                     componentInstance[key] = value;
                   }
                 );

@@ -24,6 +24,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   private readonly reactiveSelectors: ComputedSelectors<T, U>;
   private readonly stateStopWatches = new Map();
   private readonly selectorStopWatches = new Map();
+  private readonly componentInstanceToUpdatesMap = new Map();
 
   constructor(initialState: T, selectors?: Selectors<T, U>) {
     this.reactiveState = reactive(initialState);
@@ -80,9 +81,29 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
       this.stateStopWatches.get(componentInstance).push(
         watch(
           () => subState,
-          () => (componentInstance[stateName] = subState),
+          () => {
+            if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
+              setTimeout(() => {
+                Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ([key, value]: [string, any]) => {
+                    console.log(key, value);
+                    componentInstance[key] = value;
+                  }
+                );
+
+                this.componentInstanceToUpdatesMap.delete(componentInstance);
+              }, 0);
+            }
+
+            this.componentInstanceToUpdatesMap.set(componentInstance, {
+              ...this.componentInstanceToUpdatesMap.get(componentInstance),
+              [stateName]: subState
+            });
+          },
           {
-            deep: true
+            deep: true,
+            flush: 'sync'
           }
         )
       );
@@ -112,9 +133,29 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
       this.selectorStopWatches.get(componentInstance).push(
         watch(
           () => selector,
-          () => (componentInstance[selectorName] = selector.value),
+          () => {
+            if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
+              setTimeout(() => {
+                Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ([key, value]: [string, any]) => {
+                    console.log(key, value);
+                    componentInstance[key] = value;
+                  }
+                );
+
+                this.componentInstanceToUpdatesMap.delete(componentInstance);
+              }, 0);
+            }
+
+            this.componentInstanceToUpdatesMap.set(componentInstance, {
+              ...this.componentInstanceToUpdatesMap.get(componentInstance),
+              [selectorName]: selector.value
+            });
+          },
           {
-            deep: true
+            deep: true,
+            flush: 'sync'
           }
         )
       );

@@ -542,10 +542,15 @@ fetchTodos.ts
 
 https://github.com/universal-model/universal-model-angular-todo-app
 
+### Dependency injection
+If you would like to use dependency injection (noicejs) in your app, check out this [example],
+where DI is used to create services.
+
 ### License
 
 MIT License
 
+[example]: https://github.com/universal-model/react-todo-app-with-dependency-injection
 [universal-model-react]: https://github.com/universal-model/universal-model-react
 [universal-model-svelte]: https://github.com/universal-model/universal-model-svelte
 [universal-model-vue]: https://github.com/universal-model/universal-model-vue

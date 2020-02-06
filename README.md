@@ -132,7 +132,7 @@ and will throw an error.
 in large projects you should have sub stores for components and these sub store are combined 
 together to a single store in store.js:
 
-componentBStore.js
+**componentBStore.js**
 
     const componentBnitialState = { 
       componentBState: createSubState(initialComponentBState),
@@ -148,7 +148,7 @@ componentBStore.js
       createComponent2Selectors<State>('componentB');
     ]);
     
-store.js
+**store.js**
 
     const initialState = {
       ...componentAInitialState,
@@ -199,7 +199,7 @@ provided by those components. This will ensure encapsulation of each component's
       changeComponentAState = changeComponentAState
       
       constructor() {
-        const { componentAState, { selector1, selector2 } = store.getStateAndSelectors();
+        const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
         useStateAndSelectors(this, { componentAState: state }, { selector1, selector2 });
       }
     }

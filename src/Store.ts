@@ -1,4 +1,4 @@
-import { Ref, UnwrapRef, reactive, watch, StopHandle, ComputedRef, computed } from 'vue';
+import { Ref, UnwrapRef, reactive, watch, StopHandle, ComputedRef, computed } from '@pksilen/reactive-js';
 import { SubStateFlagWrapper } from './createSubState';
 
 export type SubState = Omit<object, '__isSubState__'> & SubStateFlagWrapper;

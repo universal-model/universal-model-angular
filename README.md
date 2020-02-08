@@ -29,15 +29,15 @@ with [universal-model] library
 - State changes trigger view updates
 - Selectors select and calculate a transformed version of state that causes view updates
 - Views contain NO business logic
-- There can be multiple interchangable views that use same part of model
+- There can be multiple interchangeable views that use same part of model
 - A new view can be created to represent model differently without any changes to model
 - View technology can be changed without changes to the model
 
 ## Clean UI Code directory layout
 UI application is divided into UI components. Common UI components should be put into common directory. Each component
 can consist of subcomponents. Each component has a view and optionally controller and model. Model consists of actions, state
-and selectors. In large scale apps, model can contain substore. Application has one store which is composed of each components'
-state (or substores)
+and selectors. In large scale apps, model can contain sub-store. Application has one store which is composed of each components'
+state (or sub-stores)
 
     - src
       |
@@ -101,8 +101,6 @@ encapsulation of component state.
 
 **Create and export store in store.ts:**
 
-**Create and export store in store.ts:**
-
 combineSelectors() checks if there are duplicate keys in selectors and will throw an error telling which key was duplicated.
 By using combineSelectors you can keep your selector names short and only namespace them if needed.
     
@@ -136,12 +134,12 @@ together to a single store in store.js:
     
     const componentBStateSelectors = createComponentBStateSelectors<State>();
     const componentB_1StateSelectors = createComponentB_1StateSelectors<State>();
-    const component1Selectors = createComponent1Selectors<State>('componentB');
+    const component1ForComponentBSelectors = createComponent1Selectors<State>('componentB');
     
-    const componentBSelectors = combineSelectors<State, typeof componentBStateSelectors, typeof componentB_1StateSelectors, typeof component1Selectors>(
+    const componentBSelectors = combineSelectors<State, typeof componentBStateSelectors, typeof componentB_1StateSelectors, typeof component1ForComponentBSelectors>(
       componentBStateSelectors,
       componentB_1StateSelectors,
-      component1Selectors
+      component1ForComponentBSelectors
     );
     
 **store.js**
@@ -155,7 +153,7 @@ together to a single store in store.js:
           
     export type State = typeof initialState;
         
-    const selectors = combineSelectors<State, typeof componentASelectors, typeof componentBSelectors, typeof componentNSelectors>([
+    const selectors = combineSelectors<State, typeof componentASelectors, typeof componentBSelectors, ... typeof componentNSelectors>([
       componentASelectors,
       componentBSelectors,
       .

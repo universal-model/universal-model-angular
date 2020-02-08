@@ -57,8 +57,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   useStateAndSelectors<V extends new (...args: any[]) => any>(
     componentInstance: InstanceType<V>,
     subStateMap: { [key: string]: SubState },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    selectorMap: { [key: string]: ComputedRef<any> }
+    selectorMap: { [key: string]: ComputedRef }
   ): void {
     this.useState(componentInstance, subStateMap);
     this.useSelectors(componentInstance, selectorMap);
@@ -120,13 +119,11 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useSelectors<V extends new (...args: any) => any>(
     componentInstance: InstanceType<V>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    selectorMap: { [key: string]: ComputedRef<any> }
+    selectorMap: { [key: string]: ComputedRef }
   ): void {
     this.selectorStopWatches.set(componentInstance, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Object.entries(selectorMap).forEach(([selectorName, selector]: [string, ComputedRef<any>]) => {
+    Object.entries(selectorMap).forEach(([selectorName, selector]: [string, ComputedRef]) => {
       componentInstance[selectorName] = selector.value;
 
       this.selectorStopWatches.get(componentInstance).push(

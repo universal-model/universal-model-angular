@@ -121,43 +121,43 @@ By using combineSelectors you can keep your selector names short and only namesp
     
     export default createStore<State, typeof selectors>(initialState, selectors);
     
-in large projects you should have sub stores for components and these sub store are combined 
+in large projects you should have sub-stores for components and these sub-store are combined 
 together to a single store in store.js:
 
-**componentBStore.js**
+**componentBSubStore.js**
 
-    const componentBInitialState = { 
+    export const initialComponentsBState = { 
       componentBState: createSubState(initialComponentBState),
       componentB_1State: createSubState(initialComponentB_1State),
-      component1ForComponentBState: createSubState(initialComponent1State) 
+      componentB_2State: createSubState(initialComponentB_2State),
     };
     
     const componentBStateSelectors = createComponentBStateSelectors<State>();
     const componentB_1StateSelectors = createComponentB_1StateSelectors<State>();
-    const component1ForComponentBSelectors = createComponent1Selectors<State>('componentB');
+    const componentB_2StateSelectors = createComponentB_2Selectors<State>('componentB');
     
-    const componentBSelectors = combineSelectors<State, typeof componentBStateSelectors, typeof componentB_1StateSelectors, typeof component1ForComponentBSelectors>(
+    const componentsBStateSelectors = combineSelectors<State, typeof componentBStateSelectors, typeof componentB_1StateSelectors, typeof componentB_2StateSelectors>(
       componentBStateSelectors,
       componentB_1StateSelectors,
-      component1ForComponentBSelectors
+      componentB_2StateSelectors
     );
     
 **store.js**
 
     const initialState = {
-      ...componentAInitialState,
-      ...componentBInitialState,
+      ...initialComponentsAState,
+      ...initialComponentsBState,
       .
-      ...componentNInitialState
+      ...initialComponentsNState
     };
           
     export type State = typeof initialState;
         
-    const selectors = combineSelectors<State, typeof componentASelectors, typeof componentBSelectors, ... typeof componentNSelectors>(
-      componentASelectors,
-      componentBSelectors,
+    const selectors = combineSelectors<State, typeof componentsAStateSelectors, typeof componentsBStateSelectors, ... typeof componentsNStateSelectors>(
+      componentsAStateSelectors,
+      componentsBStateSelectors,
       .
-      componentNSelectors
+      componentsNStateSelectors
     );
         
     export default createStore<State, typeof selectors>(initialState, selectors);

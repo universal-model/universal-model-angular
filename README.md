@@ -1,6 +1,7 @@
 # Universal Model for Angular
 
 [![version][version-badge]][package]
+[![Downloads][Downloads]][package]
 [![build][build]][circleci]
 [![MIT License][license-badge]][license]
 
@@ -562,6 +563,6 @@ MIT License
 [universal-model-react]: https://github.com/universal-model/universal-model-react
 [universal-model-svelte]: https://github.com/universal-model/universal-model-svelte
 [universal-model-vue]: https://github.com/universal-model/universal-model-vue
-
+[Downloads]: https://img.shields.io/npm/dm/universal-model-angular
 
 

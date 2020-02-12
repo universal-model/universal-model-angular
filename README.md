@@ -4,6 +4,7 @@
 [![Downloads][Downloads]][package]
 [![build][build]][circleci]
 [![MIT License][license-badge]][license]
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funiversal-model%2Funiversal-model-angular.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Funiversal-model%2Funiversal-model-angular?ref=badge_shield)
 
 Universal model is a model which can be used with any of following UI frameworks:
 
@@ -566,3 +567,6 @@ MIT License
 [Downloads]: https://img.shields.io/npm/dm/universal-model-angular
 
 
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Funiversal-model%2Funiversal-model-angular.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Funiversal-model%2Funiversal-model-angular?ref=badge_large)

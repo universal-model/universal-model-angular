@@ -40,7 +40,7 @@ Initial state may not contain key __isSubState\__, if it contains, an error will
       selectorsObject2: Selectors<T, Un>
     ): Selectors<T, U1> & ... Selectors<T, Un>;
     
-combines selectors (selector objects) to a single selector object containing all given selectors
+combines object of selectors to a single object containing all selectors
 It also checks for duplicate selector keys and throws an error if a duplicate key is found.
 
 ### createStore

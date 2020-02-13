@@ -55,7 +55,7 @@ creates a store containing initialState and selectors
 ### Store::getState
     type ReactiveState<T> = T extends Ref ? T : UnwrapRef<T>;
     
-    class Store<T extends State> {
+    class Store<T extends State, U extends SelectorsBase<T>> {
         getState(): ReactiveState<T>
     }
     
@@ -66,15 +66,15 @@ gets state from the store
        [K in keyof U]: ComputedRef<ReturnType<U[K]>>;
     };
         
-    class Store<T extends State> {
-      getSelectors(): ComputedSelectors<T>
+    class Store<T extends State, U extends SelectorsBase<T>> {
+      getSelectors(): ComputedSelectors<T, U>
     }
 
 gets selectors from the store
     
 ### Store::getStateAndSelectors
-    class Store<T extends State> {
-      getStateAndSelectors(): [ReactiveState<T>, ComputedSelectors<T>]
+    class Store<T extends State, U extends SelectorsBase<T>> {
+      getStateAndSelectors(): [ReactiveState<T>, ComputedSelectors<T, U>]
     }
 
 gets state and selectors from the store

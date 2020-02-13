@@ -18,9 +18,9 @@
       initialState: T & AllowedSubStateProperties<T>
     ): T & SubStateFlagWrapper
     
-Creates a sub state object from initial state object.
-This function adds a readonly \_\_isSubState\_\_ property to the initial state object.
-Initial state may not contain key __isSubState\__, if it contains, an error will be thrown.
+Creates a sub state object from initial state object.<br/>
+This function adds a readonly \_\_isSubState\_\_ property to the initial state object.<br/>
+Initial state may not contain key __isSubState\__, if it contains, an error will be thrown.<br/>
     
 ### combineSelectors
 
@@ -40,8 +40,8 @@ Initial state may not contain key __isSubState\__, if it contains, an error will
       selectorsObject2: Selectors<T, Un>
     ): Selectors<T, U1> & ... Selectors<T, Un>;
     
-combines object of selectors to a single object containing all selectors
-It also checks for duplicate selector keys and throws an error if a duplicate key is found.
+combines object of selectors to a single object containing all selectors<br/>
+It also checks for duplicate selector keys and throws an error if a duplicate key is found.<br/>
 
 ### createStore
 
@@ -88,8 +88,8 @@ gets state and selectors from the store
       subStateMap: { [key: string]: SubState }
     ): void
     
-makes given Angular component instance to use sub-state(s) given in subStateMap and makes changes to given sub-state(s) to update the view.
-If you call only getState() and forget to call useState(), your view won't be reactive and does not update.
+makes given Angular component instance to use sub-state(s) given in subStateMap and makes changes to given sub-state(s) to update the view.<br/>
+**Note!** If you call only getState() and forget to call useState(), your view won't be reactive and does not update.
 
 ### Store::useSelectors
 
@@ -98,8 +98,8 @@ If you call only getState() and forget to call useState(), your view won't be re
       selectorMap: { [key: string]: ComputedRef }
     ): void 
     
-makes given Angular component instance to use selectors given in selectorMap and makes changes to given selectors to update the view.
-If you call only getSelectors() and forget to call useSelectors(), your view won't be reactive and does not update.
+makes given Angular component instance to use selectors given in selectorMap and makes changes to given selectors to update the view.<br/>
+**Note!** If you call only getSelectors() and forget to call useSelectors(), your view won't be reactive and does not update.
 
 ### Store::useStateAndSelectors
 
@@ -110,5 +110,5 @@ If you call only getSelectors() and forget to call useSelectors(), your view won
     ): void
     
 makes given Angular component instance to use sub-state(s) and selectors given in subStateMap and selectorMap and makes changes to given sub-state(s)
-and selectors to update the view.
-If you call only getStateAndSelectors() and forget to call useStateAndSelectors(), your view won't be reactive and does not update.
+and selectors to update the view.<br/>
+**Note!** If you call only getStateAndSelectors() and forget to call useStateAndSelectors(), your view won't be reactive and does not update.

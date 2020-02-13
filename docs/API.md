@@ -82,7 +82,7 @@ gets state and selectors from the store
 ## Angular specific API
 
 ### Store::useState 
-
+    class Store<T extends State, U extends SelectorsBase<T>> {
     useState<V extends new (...args: any[]) => any>(
       componentInstance: InstanceType<V>,
       subStateMap: { [key: string]: SubState }

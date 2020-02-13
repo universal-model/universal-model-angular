@@ -19,7 +19,7 @@
     ): T & SubStateFlagWrapper
     
 Creates a sub state object from initial state object.
-This function adds a readonly __isSubState\__ property to the initial state object.
+This function adds a readonly \_\_isSubState\_\_ property to the initial state object.
 Initial state may not contain key __isSubState\__, if it contains, an error will be thrown.
     
 ### combineSelectors

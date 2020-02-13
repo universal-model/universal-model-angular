@@ -15,7 +15,7 @@
     };
      
     createSubState<T extends object>(
-      subState: T & AllowedSubStateProperties<T>
+      initialState: T & AllowedSubStateProperties<T>
     ): T & SubStateFlagWrapper
     
 Creates a sub state object from initial state object.

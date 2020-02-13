@@ -82,7 +82,9 @@ state (or sub-stores)
     useState(this, { componentAState });
     useSelectors(this, { selector1, selector2 });
     useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
-    
+
+[Detailed API documentation](docs/API.md)
+
 ## API Examples
 **Create initial states**
 

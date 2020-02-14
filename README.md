@@ -72,18 +72,23 @@ state (or sub-stores)
 
 
 ## API
+
+### Common API (Angular/React/Svelte/Vue)
+
     createSubState(subState);
     const store = createStore(initialState, combineSelectors(selectors))
     
     const { componentAState } = store.getState();
     const { selector1, selector2 } = store.getSelectors();
     const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
+
+### React specific API
     
     useState(this, { componentAState });
     useSelectors(this, { selector1, selector2 });
     useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
 
-[Detailed API documentation](docs/API.md)
+[Detailed API documentation](https://github.com/universal-model/universal-model-angular/blob/master/docs/API.md)
 
 ## API Examples
 **Create initial states**

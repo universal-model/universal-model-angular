@@ -82,7 +82,7 @@ state (or sub-stores)
     const { selector1, selector2 } = store.getSelectors();
     const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
 
-### React specific API
+### Angular specific API
     
     useState(this, { componentAState });
     useSelectors(this, { selector1, selector2 });

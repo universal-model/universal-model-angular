@@ -12,6 +12,8 @@ describe('createSubState', () => {
   it('should throw error if initial state object contains key: __isSubState__', () => {
     expect(() => {
       // WHEN
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore
       createSubState({ __isSubState__: 1 });
 
       // THEN

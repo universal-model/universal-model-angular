@@ -28,6 +28,8 @@ const initialState = {
 
 type State = typeof initialState;
 
+const onDestroyMock = jest.fn();
+
 class TestComponent {
   state1 = initialState1;
   numberSelector: number;
@@ -57,6 +59,10 @@ class TestComponent {
     this.weakMapSelector = 0;
     this.weakSetSelector = 0;
   }
+
+  ngOnDestroy(): void {
+    onDestroyMock();
+  }
 }
 
 const selectors = {
@@ -74,13 +80,14 @@ const selectors = {
   weakSetSelector: (state: State) => (state.state1.weakSet.has(object) ? 3 : 1)
 };
 
+const store = createStore<State, typeof selectors>(initialState, selectors);
+const testComponent = new TestComponent();
+
 describe('Store', () => {
   describe('useState', () => {
     it('should update component instance on state changes', () => {
       // GIVEN
-      const store = createStore(initialState, {});
       const { state1 } = store.getState();
-      const testComponent = new TestComponent();
       store.useState(testComponent, { state1 });
 
       // WHEN
@@ -111,13 +118,26 @@ describe('Store', () => {
       expect(testComponent.state1.set.has(1)).toBe(true);
       expect(testComponent.state1.weakMap.get(object)).toBe(1);
       expect(testComponent.state1.weakSet.has(object)).toBe(true);
+
+      // WHEN
+      testComponent.ngOnDestroy();
+
+      // THEN
+      expect(onDestroyMock).toHaveBeenCalled();
+    });
+
+    it('should throw error if given sub-state is not a sub-state', () => {
+      expect(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // @ts-ignore
+        store.useState(testComponent, { state: {}});
+      }).toThrowError('useState: One of given subStates is not subState');
     });
   });
 
   describe('useSelectors', () => {
     it('should update component instance on state changes', () => {
       // GIVEN
-      const store = createStore<State, typeof selectors>(initialState, selectors);
       const { state1 } = store.getState();
 
       const {
@@ -134,8 +154,6 @@ describe('Store', () => {
         weakMapSelector,
         weakSetSelector
       } = store.getSelectors();
-
-      const testComponent = new TestComponent();
 
       store.useSelectors(testComponent, {
         numberSelector,
@@ -180,6 +198,28 @@ describe('Store', () => {
       expect(testComponent.setSelector).toBe(3);
       expect(testComponent.weakMapSelector).toBe(3);
       expect(testComponent.weakSetSelector).toBe(3);
+
+      // WHEN
+      testComponent.ngOnDestroy();
+
+      // THEN
+      expect(onDestroyMock).toHaveBeenCalled();
+    });
+  });
+
+  describe('useStateAndSelectors', () => {
+    it('should update component instance on state changes', () => {
+      // GIVEN
+      const [{ state1 }, { numberSelector }] = store.getStateAndSelectors();
+      store.useStateAndSelectors(testComponent, { state1 }, { numberSelector });
+
+      // WHEN
+      state1.number = 5;
+      jest.runAllTimers();
+
+      // THEN
+      expect(testComponent.state1.number).toBe(5);
+      expect(testComponent.numberSelector).toBe(6);
     });
   });
 });

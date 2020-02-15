@@ -19,16 +19,13 @@ type ComputedSelectors<T extends State, U extends SelectorsBase<T>> = {
 
 type ReactiveState<T extends State> = T extends Ref ? T : UnwrapRef<T>;
 
-export default class Store<
-  T extends State,
-  U extends SelectorsBase<T>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  V extends new (...args: any[]) => any
-> {
+export default class Store<T extends State, U extends SelectorsBase<T>> {
   private readonly reactiveState: ReactiveState<T>;
   private readonly reactiveSelectors: ComputedSelectors<T, U>;
-  private readonly stateStopWatches = new Map<InstanceType<V>, StopHandle[]>();
-  private readonly selectorStopWatches = new Map<InstanceType<V>, StopHandle[]>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private readonly stateStopWatches = new Map<InstanceType<any>, StopHandle[]>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private readonly selectorStopWatches = new Map<InstanceType<any>, StopHandle[]>();
   private readonly componentInstanceToUpdatesMap = new Map();
 
   constructor(initialState: T, selectors?: Selectors<T, U>) {
@@ -46,12 +43,14 @@ export default class Store<
     }
   }
 
-  getStateStopWatches(): Readonly<Map<InstanceType<V>, StopHandle[]>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getStateStopWatches(): Readonly<Map<InstanceType<any>, StopHandle[]>> {
     return this.stateStopWatches;
   }
 
-  getSelectorStopWatches(): Readonly<Map<InstanceType<V>, StopHandle[]>> {
-    return this.stateStopWatches;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getSelectorStopWatches(): Readonly<Map<InstanceType<any>, StopHandle[]>> {
+    return this.selectorStopWatches;
   }
 
   getState(): ReactiveState<T> {
@@ -67,7 +66,7 @@ export default class Store<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useStateAndSelectors(
+  useStateAndSelectors<V extends new (...args: any[]) => any>(
     componentInstance: InstanceType<V>,
     subStateMap: { [key: string]: SubState },
     selectorMap: { [key: string]: ComputedRef }
@@ -77,7 +76,10 @@ export default class Store<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useState(componentInstance: InstanceType<V>, subStateMap: { [key: string]: SubState }): void {
+  useState<V extends new (...args: any[]) => any>(
+    componentInstance: InstanceType<V>,
+    subStateMap: { [key: string]: SubState }
+  ): void {
     this.stateStopWatches.set(componentInstance, []);
 
     Object.entries(subStateMap).forEach(([stateName, subState]: [string, SubState]) => {
@@ -87,39 +89,13 @@ export default class Store<
 
       componentInstance[stateName] = subState;
 
-      this.stateStopWatches.get(componentInstance)?.push(
-        watch(
-          () => subState,
-          () => {
-            if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
-              setTimeout(() => {
-                Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  ([key, value]: [string, any]) => {
-                    componentInstance[key] = value;
-                  }
-                );
-
-                this.componentInstanceToUpdatesMap.delete(componentInstance);
-              }, 0);
-            }
-
-            this.componentInstanceToUpdatesMap.set(componentInstance, {
-              ...this.componentInstanceToUpdatesMap.get(componentInstance),
-              [stateName]: subState
-            });
-          },
-          {
-            deep: true,
-            flush: 'sync'
-          }
-        )
-      );
+      this.stateStopWatches.get(componentInstance)?.push(this.watch(componentInstance, stateName, subState));
     });
 
     const originalOnDestroy = componentInstance.ngOnDestroy;
     componentInstance.ngOnDestroy = () => {
       this.stateStopWatches.get(componentInstance)?.forEach((stopWatch: StopHandle) => stopWatch());
+      this.stateStopWatches.delete(componentInstance);
       if (originalOnDestroy) {
         originalOnDestroy();
       }
@@ -127,48 +103,61 @@ export default class Store<
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useSelectors(componentInstance: InstanceType<V>, selectorMap: { [key: string]: ComputedRef }): void {
+  useSelectors<V extends new (...args: any[]) => any>(
+    componentInstance: InstanceType<V>,
+    selectorMap: { [key: string]: ComputedRef }
+  ): void {
     this.selectorStopWatches.set(componentInstance, []);
 
     Object.entries(selectorMap).forEach(([selectorName, selector]: [string, ComputedRef]) => {
       componentInstance[selectorName] = selector.value;
 
-      this.selectorStopWatches.get(componentInstance)?.push(
-        watch(
-          () => selector,
-          () => {
-            if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
-              setTimeout(() => {
-                Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  ([key, value]: [string, any]) => {
-                    componentInstance[key] = value;
-                  }
-                );
-
-                this.componentInstanceToUpdatesMap.delete(componentInstance);
-              }, 0);
-            }
-
-            this.componentInstanceToUpdatesMap.set(componentInstance, {
-              ...this.componentInstanceToUpdatesMap.get(componentInstance),
-              [selectorName]: selector.value
-            });
-          },
-          {
-            deep: true,
-            flush: 'sync'
-          }
-        )
-      );
+      this.selectorStopWatches
+        .get(componentInstance)
+        ?.push(this.watch(componentInstance, selectorName, selector));
     });
 
     const originalOnDestroy = componentInstance.ngOnDestroy;
     componentInstance.ngOnDestroy = () => {
       this.selectorStopWatches.get(componentInstance)?.forEach((stopWatch: StopHandle) => stopWatch());
+      this.selectorStopWatches.delete(componentInstance);
       if (originalOnDestroy) {
         originalOnDestroy();
       }
     };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  watch<V extends new (...args: any[]) => any>(
+    componentInstance: InstanceType<V>,
+    name: string,
+    subStateOrSelector: SubState | ComputedRef
+  ): StopHandle {
+    return watch(
+      () => subStateOrSelector,
+      () => {
+        if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
+          setTimeout(() => {
+            Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ([key, value]: [string, any]) => {
+                componentInstance[key] = value;
+              }
+            );
+
+            this.componentInstanceToUpdatesMap.delete(componentInstance);
+          }, 0);
+        }
+
+        this.componentInstanceToUpdatesMap.set(componentInstance, {
+          ...this.componentInstanceToUpdatesMap.get(componentInstance),
+          [name]: 'effect' in subStateOrSelector ? subStateOrSelector.value : subStateOrSelector
+        });
+      },
+      {
+        deep: true,
+        flush: 'sync'
+      }
+    );
   }
 }

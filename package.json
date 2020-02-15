@@ -12,7 +12,7 @@
     "check-types": "tsc --outDir ./lib/types",
     "build": "babel ./src --out-dir lib --source-maps --extensions \".ts\", --ignore \"src/tests/\",\"src/setupTests.js\"",
     "lint": "eslint ./src --ext .ts",
-    "prebuild": "npm run clean && npm run prettier && npm run lint && npm run check-types",
+    "prebuild": "npm run clean && npm run prettier && npm run lint && npm run check-types && npm run test-coverage",
     "prepublishOnly": "npm run build",
     "prettier": "prettier --check \"src/**/*.ts\"",
     "test-coverage": "jest ./src --coverage"

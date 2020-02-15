@@ -1,5 +1,6 @@
 import createSubState from '../createSubState';
 import createStore from '../createStore';
+import Store from '../Store';
 
 jest.useFakeTimers();
 
@@ -80,8 +81,13 @@ const selectors = {
   weakSetSelector: (state: State) => (state.state1.weakSet.has(object) ? 3 : 1)
 };
 
-const store = createStore<State, typeof selectors>(initialState, selectors);
-const testComponent = new TestComponent();
+let store: Store<State, typeof selectors>;
+let testComponent: TestComponent;
+
+beforeEach(() => {
+  store = createStore<State, typeof selectors>(initialState, selectors);
+  testComponent = new TestComponent();
+});
 
 describe('Store', () => {
   describe('useState', () => {
@@ -124,6 +130,24 @@ describe('Store', () => {
 
       // THEN
       expect(onDestroyMock).toHaveBeenCalled();
+    });
+
+    it('should stop started watches', () => {
+      // GIVEN
+      const stopWatch = jest.fn();
+      store.watch = () => stopWatch;
+      const { state1 } = store.getState();
+      store.useState(testComponent, { state1 });
+      const stopWatchesBeforeDestroy = store.getStateStopWatches().get(testComponent);
+      expect(stopWatchesBeforeDestroy?.length).toBe(1);
+
+      // WHEN
+      testComponent.ngOnDestroy();
+
+      // THEN
+      const stopWatchesAfterDestroy = store.getStateStopWatches().get(testComponent);
+      expect(stopWatchesAfterDestroy).toBe(undefined);
+      expect(stopWatch).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error if given sub-state is not a sub-state', () => {
@@ -205,6 +229,24 @@ describe('Store', () => {
       // THEN
       expect(onDestroyMock).toHaveBeenCalled();
     });
+  });
+
+  it('should stop started watches', () => {
+    // GIVEN
+    const stopWatch = jest.fn();
+    store.watch = () => stopWatch;
+    const { numberSelector, stringSelector } = store.getSelectors();
+    store.useSelectors(testComponent, { numberSelector, stringSelector });
+    const stopWatchesBeforeDestroy = store.getSelectorStopWatches().get(testComponent);
+    expect(stopWatchesBeforeDestroy?.length).toBe(2);
+
+    // WHEN
+    testComponent.ngOnDestroy();
+
+    // THEN
+    const stopWatchesAfterDestroy = store.getSelectorStopWatches().get(testComponent);
+    expect(stopWatchesAfterDestroy).toBe(undefined);
+    expect(stopWatch).toHaveBeenCalledTimes(2);
   });
 
   describe('useStateAndSelectors', () => {

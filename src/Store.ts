@@ -44,13 +44,17 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getStateStopWatches(): Readonly<Map<InstanceType<any>, StopHandle[]>> {
-    return this.stateStopWatches;
+  getStateStopWatches<V extends new (...args: any[]) => any>(
+    componentInstace: InstanceType<V>
+  ): Readonly<StopHandle[]> | undefined {
+    return this.stateStopWatches.get(componentInstace);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getSelectorStopWatches(): Readonly<Map<InstanceType<any>, StopHandle[]>> {
-    return this.selectorStopWatches;
+  getSelectorStopWatches<V extends new (...args: any[]) => any>(
+    componentInstace: InstanceType<V>
+  ): Readonly<StopHandle[]> | undefined {
+    return this.selectorStopWatches.get(componentInstace);
   }
 
   getState(): ReactiveState<T> {

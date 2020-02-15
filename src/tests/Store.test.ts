@@ -138,14 +138,14 @@ describe('Store', () => {
       store.watch = () => stopWatch;
       const { state1 } = store.getState();
       store.useState(testComponent, { state1 });
-      const stopWatchesBeforeDestroy = store.getStateStopWatches().get(testComponent);
+      const stopWatchesBeforeDestroy = store.getStateStopWatches(testComponent);
       expect(stopWatchesBeforeDestroy?.length).toBe(1);
 
       // WHEN
       testComponent.ngOnDestroy();
 
       // THEN
-      const stopWatchesAfterDestroy = store.getStateStopWatches().get(testComponent);
+      const stopWatchesAfterDestroy = store.getStateStopWatches(testComponent);
       expect(stopWatchesAfterDestroy).toBe(undefined);
       expect(stopWatch).toHaveBeenCalledTimes(1);
     });
@@ -237,14 +237,14 @@ describe('Store', () => {
     store.watch = () => stopWatch;
     const { numberSelector, stringSelector } = store.getSelectors();
     store.useSelectors(testComponent, { numberSelector, stringSelector });
-    const stopWatchesBeforeDestroy = store.getSelectorStopWatches().get(testComponent);
+    const stopWatchesBeforeDestroy = store.getSelectorStopWatches(testComponent);
     expect(stopWatchesBeforeDestroy?.length).toBe(2);
 
     // WHEN
     testComponent.ngOnDestroy();
 
     // THEN
-    const stopWatchesAfterDestroy = store.getSelectorStopWatches().get(testComponent);
+    const stopWatchesAfterDestroy = store.getSelectorStopWatches(testComponent);
     expect(stopWatchesAfterDestroy).toBe(undefined);
     expect(stopWatch).toHaveBeenCalledTimes(2);
   });

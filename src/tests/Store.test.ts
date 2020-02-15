@@ -130,7 +130,7 @@ describe('Store', () => {
       expect(() => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
-        store.useState(testComponent, { state: {}});
+        store.useState(testComponent, { state: {} });
       }).toThrowError('useState: One of given subStates is not subState');
     });
   });

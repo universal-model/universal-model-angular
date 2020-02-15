@@ -22,7 +22,7 @@ Function, object, Array<any>, Map, Set, WeakMap, WeakSet
       selectorsObject2: Selectors<T, Un>
     ): Selectors<T, U1> & ... Selectors<T, Un>;
     
-combines object of selectors to a single object containing all selectors<br/>
+combines objects of selectors to a single object containing all selectors<br/>
 It also checks for duplicate selector keys and throws an error if a duplicate key is found.<br/>
 
 ### createStore

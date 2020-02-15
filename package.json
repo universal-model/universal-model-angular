@@ -1,6 +1,6 @@
 {
   "name": "universal-model-angular",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "Universal model for Angular",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

@@ -1,7 +1,7 @@
-import { Ref, UnwrapRef, reactive, watch, StopHandle, ComputedRef, computed } from '@pksilen/reactive-js';
+import { computed, ComputedRef, reactive, Ref, StopHandle, UnwrapRef, watch } from '@pksilen/reactive-js';
 import { SubStateFlagWrapper } from './createSubState';
 
-export type SubState = Omit<object, '__isSubState__'> & SubStateFlagWrapper;
+export type SubState = object & SubStateFlagWrapper;
 export type State = { [key: string]: SubState };
 
 export type SelectorsBase<T extends State> = {
@@ -17,7 +17,7 @@ type ComputedSelectors<T extends State, U extends SelectorsBase<T>> = {
   [K in keyof U]: ComputedRef<ReturnType<U[K]>>;
 };
 
-type ReactiveState<T> = T extends Ref ? T : UnwrapRef<T>;
+type ReactiveState<T extends State> = T extends Ref ? T : UnwrapRef<T>;
 
 export default class Store<T extends State, U extends SelectorsBase<T>> {
   private readonly reactiveState: ReactiveState<T>;

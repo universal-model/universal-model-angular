@@ -19,16 +19,12 @@ type DisallowedInitialStatePropertyValueType =
   | Uint32Array
   | Float32Array
   | Float64Array
-  | BigInt64Array
-  | BigUint64Array
   | ArrayBuffer
   | DataView
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | Promise<any>
   | Generator
   | GeneratorFunction
-  | AsyncGeneratorFunction
-  | AsyncGeneratorFunctionConstructor
   | ProxyConstructor
   | Intl.Collator
   | Intl.DateTimeFormat

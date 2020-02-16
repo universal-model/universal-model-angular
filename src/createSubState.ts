@@ -79,7 +79,6 @@ export default function createSubState<T extends InitialState<T>>(
   if (process.env.NODE_ENV !== 'production') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.entries(initialState).forEach(([key, value]: [string, any]) => {
-      console.log(key, value);
       if (
         isInstanceOf(value, Error) ||
         isInstanceOf(value, Date) ||

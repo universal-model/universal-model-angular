@@ -10,7 +10,6 @@ type DisallowedInitialStatePropertyValueType =
   | Error
   | Date
   | RegExp
-  | BigInt
   | Int8Array
   | Uint8Array
   | Uint8ClampedArray

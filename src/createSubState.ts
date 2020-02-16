@@ -10,6 +10,7 @@ type DisallowedInitialStatePropertyValueType =
   | Error
   | Date
   | RegExp
+  | BigInt
   | Int8Array
   | Uint8Array
   | Uint8ClampedArray
@@ -58,48 +59,60 @@ export default function createSubState<T extends InitialState<T>>(
     throw new Error('createSubState: subState may not contain key: __isSubState__');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function isInstanceOf<T extends new (...args: any[]) => any, U extends Function>(
+    instance: InstanceType<T>,
+    constructorFunction: U
+  ): boolean {
+    let instancePrototype = instance?.__proto__;
+    const constructorPrototype = constructorFunction?.prototype;
+
+    while (instancePrototype && constructorPrototype) {
+      if (instancePrototype === constructorPrototype) {
+        return true;
+      }
+      instancePrototype = instancePrototype.__proto__;
+    }
+
+    return false;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.entries(initialState).forEach(([key, value]: [string, any]) => {
-      let isForbidden;
-
-      try {
-        isForbidden =
-          value instanceof Error ||
-          value instanceof Date ||
-          value instanceof RegExp ||
-          value instanceof Int8Array ||
-          value instanceof Uint8Array ||
-          value instanceof Uint8ClampedArray ||
-          value instanceof Int16Array ||
-          value instanceof Uint16Array ||
-          value instanceof Int32Array ||
-          value instanceof Uint32Array ||
-          value instanceof Float32Array ||
-          value instanceof Float64Array ||
-          value instanceof BigInt64Array ||
-          value instanceof BigUint64Array ||
-          value instanceof ArrayBuffer ||
-          value instanceof DataView ||
-          value instanceof Promise ||
-          value instanceof Proxy ||
-          value instanceof Intl.Collator ||
-          value instanceof Intl.DateTimeFormat ||
-          value instanceof Intl.NumberFormat ||
-          value instanceof Intl.PluralRules ||
-          (typeof value !== 'number' &&
-            typeof value !== 'boolean' &&
-            typeof value !== 'string' &&
-            typeof value !== 'undefined' &&
-            value !== null &&
-            !Array.isArray(value) &&
-            typeof value !== 'function' &&
-            typeof value !== 'object');
-      } catch (error) {
-        // NOOP
-      }
-
-      if (isForbidden) {
+      console.log(key, value);
+      if (
+        isInstanceOf(value, Error) ||
+        isInstanceOf(value, Date) ||
+        isInstanceOf(value, RegExp) ||
+        isInstanceOf(value, BigInt) ||
+        isInstanceOf(value, Int8Array) ||
+        isInstanceOf(value, Uint8Array) ||
+        isInstanceOf(value, Uint8ClampedArray) ||
+        isInstanceOf(value, Int16Array) ||
+        isInstanceOf(value, Uint16Array) ||
+        isInstanceOf(value, Int32Array) ||
+        isInstanceOf(value, Uint32Array) ||
+        isInstanceOf(value, Float32Array) ||
+        isInstanceOf(value, Float64Array) ||
+        isInstanceOf(value, BigInt64Array) ||
+        isInstanceOf(value, BigUint64Array) ||
+        isInstanceOf(value, ArrayBuffer) ||
+        isInstanceOf(value, DataView) ||
+        isInstanceOf(value, Promise) ||
+        isInstanceOf(value, Proxy) ||
+        isInstanceOf(value, Intl.Collator) ||
+        isInstanceOf(value, Intl.DateTimeFormat) ||
+        isInstanceOf(value, Intl.NumberFormat) ||
+        isInstanceOf(value, Intl.PluralRules) ||
+        (typeof value !== 'number' &&
+          typeof value !== 'boolean' &&
+          typeof value !== 'string' &&
+          typeof value !== 'undefined' &&
+          value !== null &&
+          typeof value !== 'function' &&
+          typeof value !== 'object')
+      ) {
         throw new Error('Forbidden value type for key: ' + key);
       }
     });

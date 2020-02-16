@@ -27,6 +27,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly selectorStopWatches = new Map<InstanceType<any>, StopHandle[]>();
   private readonly componentInstanceToUpdatesMap = new Map();
+  private updateCount = 0;
 
   constructor(initialState: T, selectors?: Selectors<T, U>) {
     this.reactiveState = reactive(initialState);
@@ -55,6 +56,10 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
     componentInstace: InstanceType<V>
   ): Readonly<StopHandle[]> | undefined {
     return this.selectorStopWatches.get(componentInstace);
+  }
+
+  getUpdateCount(): Readonly<number> {
+    return this.updateCount;
   }
 
   getState(): ReactiveState<T> {
@@ -92,7 +97,6 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
       }
 
       componentInstance[stateName] = subState;
-
       this.stateStopWatches.get(componentInstance)?.push(this.watch(componentInstance, stateName, subState));
     });
 
@@ -142,6 +146,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
       () => {
         if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
           setTimeout(() => {
+            this.updateCount++;
             Object.entries(this.componentInstanceToUpdatesMap.get(componentInstance)).forEach(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ([key, value]: [string, any]) => {

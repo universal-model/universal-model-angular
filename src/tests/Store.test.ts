@@ -124,6 +124,7 @@ describe('Store', () => {
       expect(testComponent.state1.set.has(1)).toBe(true);
       expect(testComponent.state1.weakMap.get(object)).toBe(1);
       expect(testComponent.state1.weakSet.has(object)).toBe(true);
+      expect(store.getUpdateCount()).toBe(1);
 
       // WHEN
       testComponent.ngOnDestroy();
@@ -222,6 +223,7 @@ describe('Store', () => {
       expect(testComponent.setSelector).toBe(3);
       expect(testComponent.weakMapSelector).toBe(3);
       expect(testComponent.weakSetSelector).toBe(3);
+      expect(store.getUpdateCount()).toBe(1);
 
       // WHEN
       testComponent.ngOnDestroy();
@@ -262,6 +264,7 @@ describe('Store', () => {
       // THEN
       expect(testComponent.state1.number).toBe(5);
       expect(testComponent.numberSelector).toBe(6);
+      expect(store.getUpdateCount()).toBe(1);
     });
   });
 });

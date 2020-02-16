@@ -60,38 +60,45 @@ export default function createSubState<T extends InitialState<T>>(
 
   if (process.env.NODE_ENV !== 'production') {
     Object.entries(initialState).forEach(([key, value]: [string, any]) => {
-      if (
-        value instanceof Error ||
-        value instanceof Date ||
-        value instanceof RegExp ||
-        value instanceof Int8Array ||
-        value instanceof Uint8ClampedArray ||
-        value instanceof Int16Array ||
-        value instanceof Uint16Array ||
-        value instanceof Int32Array ||
-        value instanceof Uint32Array ||
-        value instanceof Float32Array ||
-        value instanceof Float64Array ||
-        value instanceof BigInt64Array ||
-        value instanceof BigUint64Array ||
-        value instanceof ArrayBuffer ||
-        value instanceof DataView ||
-        value instanceof Promise ||
-        value instanceof Proxy ||
-        value instanceof Intl.Collator ||
-        value instanceof Intl.PluralRules ||
-        value instanceof Intl.DateTimeFormat ||
-        value instanceof Intl.NumberFormat ||
-        value instanceof Intl.PluralRules ||
-        (typeof value !== 'number' &&
-          typeof value !== 'boolean' &&
-          typeof value !== 'string' &&
-          typeof value !== 'undefined' &&
-          value !== null &&
-          !Array.isArray(value) &&
-          typeof value !== 'function' &&
-          typeof value !== 'object')
-      ) {
+      let isForbidden;
+
+      try {
+        isForbidden =
+          value instanceof Error ||
+          value instanceof Date ||
+          value instanceof RegExp ||
+          value instanceof Int8Array ||
+          value instanceof Uint8Array ||
+          value instanceof Uint8ClampedArray ||
+          value instanceof Int16Array ||
+          value instanceof Uint16Array ||
+          value instanceof Int32Array ||
+          value instanceof Uint32Array ||
+          value instanceof Float32Array ||
+          value instanceof Float64Array ||
+          value instanceof BigInt64Array ||
+          value instanceof BigUint64Array ||
+          value instanceof ArrayBuffer ||
+          value instanceof DataView ||
+          value instanceof Promise ||
+          value instanceof Proxy ||
+          value instanceof Intl.Collator ||
+          value instanceof Intl.DateTimeFormat ||
+          value instanceof Intl.NumberFormat ||
+          value instanceof Intl.PluralRules ||
+          (typeof value !== 'number' &&
+            typeof value !== 'boolean' &&
+            typeof value !== 'string' &&
+            typeof value !== 'undefined' &&
+            value !== null &&
+            !Array.isArray(value) &&
+            typeof value !== 'function' &&
+            typeof value !== 'object');
+      } catch (error) {
+        // NOOP
+      }
+
+      if (isForbidden) {
         throw new Error('Forbidden value type for key: ' + key);
       }
     });

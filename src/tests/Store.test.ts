@@ -24,7 +24,10 @@ const initialState1 = {
 };
 
 const initialState = {
-  state1: createSubState(initialState1)
+  state1: createSubState(initialState1),
+  state2: createSubState({
+    value: 2
+  })
 };
 
 type State = typeof initialState;
@@ -93,8 +96,8 @@ describe('Store', () => {
   describe('useState', () => {
     it('should update component instance on state changes', () => {
       // GIVEN
-      const { state1 } = store.getState();
-      store.useState(testComponent, { state1 });
+      const { state1, state2 } = store.getState();
+      store.useState(testComponent, { state1, state2Value: () => state2.value });
 
       // WHEN
       state1.number = 2;
@@ -109,6 +112,7 @@ describe('Store', () => {
       state1.set.add(1);
       state1.weakMap.set(object, 1);
       state1.weakSet.add(object);
+      state2.value = 3;
       jest.runAllTimers();
 
       // THEN

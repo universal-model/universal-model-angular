@@ -64,10 +64,10 @@ gets state and selectors from the store
     
     useState<V extends new (...args: any[]) => any>(
       componentInstance: InstanceType<V>,
-      subStateMap: { [key: string]: SubState }
+      subStateOrStateGetterMap: { [key: string]: SubState | StateGetter }
     ): void
     
-makes given Angular component instance to use sub-state(s) given in subStateMap and makes changes to given sub-state(s) to update the view.<br/>
+makes given Angular component instance to use sub-state(s) or state getters given in subStateOrStateGetterMap and makes changes to given sub-state(s) and state getter(s) to update the view.<br/>
 **Note!** If you call only getState() and forget to call useState(), your view won't be reactive and does not update.
 
 ### Store::useSelectors
@@ -84,10 +84,10 @@ makes given Angular component instance to use selectors given in selectorMap and
 
     useStateAndSelectors<V extends new (...args: any[]) => any>(
       componentInstance: InstanceType<V>,
-      subStateMap: { [key: string]: SubState },
+      subStateOrStateGetterMap: { [key: string]: SubState | StateGetter },
       selectorMap: { [key: string]: ComputedRef }
     ): void
     
-makes given Angular component instance to use sub-state(s) and selectors given in subStateMap and selectorMap and makes changes to given sub-state(s)
+makes given Angular component instance to use sub-state(s), state getters and selectors given in subStateOrStateGetterMap and selectorMap and makes changes to given sub-state(s), or state getter(s) 
 and selectors to update the view.<br/>
 **Note!** If you call only getStateAndSelectors() and forget to call useStateAndSelectors(), your view won't be reactive and does not update.

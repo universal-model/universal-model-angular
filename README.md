@@ -80,13 +80,13 @@ state (or sub-stores)
     createSubState(subState);
     const store = createStore(initialState, combineSelectors(selectors))
     
-    const { componentAState } = store.getState();
+    const { componentAState, componentBState } = store.getState();
     const { selector1, selector2 } = store.getSelectors();
     const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
 
 ### Angular specific API
     
-    useState(this, { componentAState });
+    useState(this, { componentAState, componentBStateProp1: () => componentBState.prop1 });
     useSelectors(this, { selector1, selector2 });
     useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
 
@@ -197,18 +197,20 @@ call other component's action. This will ensure encapsulation of component's own
 **Use actions, state and selectors in Views (Angular Components)**
 
 Components should use only their own state and access other components' states using selectors
-provided by those components. This will ensure encapsulation of each component's state.
+provided by those components. This will ensure encapsulation of each component's state. You can also
+access foreign state with a state getter.
     
     export default class AComponent {
       state: typeof initialComponentAState;
+      foreignStateProp1: number,
       selector1: string,
       selector2: number
       // Action
       changeComponentAState = changeComponentAState
       
       constructor() {
-        const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
-        useStateAndSelectors(this, { componentAState: state }, { selector1, selector2 });
+        const [{ componentAState, componentBState }, { selector1, selector2 }] = store.getStateAndSelectors();
+        useStateAndSelectors(this, { state: componentAState, foreignStateProp1: () => componentBState.prop1  }, { selector1, selector2 });
       }
     }
 

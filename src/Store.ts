@@ -3,6 +3,8 @@ import { SubStateFlagWrapper } from './createSubState';
 
 export type SubState = object & SubStateFlagWrapper;
 export type State = { [key: string]: SubState };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type StateGetter = () => any;
 
 export type SelectorsBase<T extends State> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,28 +79,36 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useStateAndSelectors<V extends new (...args: any[]) => any>(
     componentInstance: InstanceType<V>,
-    subStateMap: { [key: string]: SubState },
+    subStateOrStateGetterMap: { [key: string]: SubState | StateGetter },
     selectorMap: { [key: string]: ComputedRef }
   ): void {
-    this.useState(componentInstance, subStateMap);
+    this.useState(componentInstance, subStateOrStateGetterMap);
     this.useSelectors(componentInstance, selectorMap);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useState<V extends new (...args: any[]) => any>(
     componentInstance: InstanceType<V>,
-    subStateMap: { [key: string]: SubState }
+    subStateOrStateGetterMap: { [key: string]: SubState | StateGetter }
   ): void {
     this.stateStopWatches.set(componentInstance, []);
 
-    Object.entries(subStateMap).forEach(([stateName, subState]: [string, SubState]) => {
-      if (!subState.__isSubState__) {
-        throw new Error('useState: One of given subStates is not subState');
-      }
+    Object.entries(subStateOrStateGetterMap).forEach(
+      ([stateName, subStateOrStateGetter]: [string, SubState | StateGetter]) => {
+        if (typeof subStateOrStateGetter !== 'function' && !subStateOrStateGetter.__isSubState__) {
+          throw new Error('useState: One of given subStates is not subState');
+        }
 
-      componentInstance[stateName] = subState;
-      this.stateStopWatches.get(componentInstance)?.push(this.watch(componentInstance, stateName, subState));
-    });
+        componentInstance[stateName] =
+          typeof subStateOrStateGetter === 'function'
+            ? computed(() => subStateOrStateGetter)
+            : subStateOrStateGetter;
+
+        this.stateStopWatches
+          .get(componentInstance)
+          ?.push(this.watch(componentInstance, stateName, subStateOrStateGetter));
+      }
+    );
 
     const originalOnDestroy = componentInstance.ngOnDestroy;
     componentInstance.ngOnDestroy = () => {
@@ -139,10 +149,10 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   watch<V extends new (...args: any[]) => any>(
     componentInstance: InstanceType<V>,
     name: string,
-    subStateOrSelector: SubState | ComputedRef
+    subStateOrStateGetterOrSelector: SubState | StateGetter | ComputedRef
   ): StopHandle {
     return watch(
-      () => subStateOrSelector,
+      () => subStateOrStateGetterOrSelector,
       () => {
         if (!this.componentInstanceToUpdatesMap.get(componentInstance)) {
           setTimeout(() => {
@@ -160,7 +170,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
 
         this.componentInstanceToUpdatesMap.set(componentInstance, {
           ...this.componentInstanceToUpdatesMap.get(componentInstance),
-          [name]: 'effect' in subStateOrSelector ? subStateOrSelector.value : subStateOrSelector
+          [name]: 'effect' in subStateOrStateGetterOrSelector ? subStateOrStateGetterOrSelector.value : subStateOrStateGetterOrSelector
         });
       },
       {

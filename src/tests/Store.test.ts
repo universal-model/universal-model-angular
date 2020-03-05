@@ -48,6 +48,7 @@ class TestComponent {
   setSelector: number;
   weakMapSelector: number;
   weakSetSelector: number;
+  state2Value: number;
 
   constructor() {
     this.numberSelector = 0;
@@ -62,6 +63,7 @@ class TestComponent {
     this.setSelector = 0;
     this.weakMapSelector = 0;
     this.weakSetSelector = 0;
+    this.state2Value = 0;
   }
 
   ngOnDestroy(): void {
@@ -128,6 +130,7 @@ describe('Store', () => {
       expect(testComponent.state1.set.has(1)).toBe(true);
       expect(testComponent.state1.weakMap.get(object)).toBe(1);
       expect(testComponent.state1.weakSet.has(object)).toBe(true);
+      expect(testComponent.state2Value).toBe(3);
       expect(store.getUpdateCount()).toBe(1);
 
       // WHEN

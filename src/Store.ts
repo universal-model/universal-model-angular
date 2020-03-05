@@ -79,7 +79,7 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   useStateAndSelectors<V extends new (...args: any[]) => any>(
     componentInstance: InstanceType<V>,
-    subStateOrStateGetterMap: { [key: string]: SubState | StateGetter },
+    subStateOrStateGetterMap: { [stateName: string]: SubState | StateGetter },
     selectorMap: { [key: string]: ComputedRef }
   ): void {
     this.useState(componentInstance, subStateOrStateGetterMap);
@@ -101,12 +101,20 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
 
         componentInstance[stateName] =
           typeof subStateOrStateGetter === 'function'
-            ? computed(() => subStateOrStateGetter)
+            ? computed(subStateOrStateGetter).value
             : subStateOrStateGetter;
 
         this.stateStopWatches
           .get(componentInstance)
-          ?.push(this.watch(componentInstance, stateName, subStateOrStateGetter));
+          ?.push(
+            this.watch(
+              componentInstance,
+              stateName,
+              typeof subStateOrStateGetter === 'function'
+                ? computed(subStateOrStateGetter)
+                : subStateOrStateGetter
+            )
+          );
       }
     );
 

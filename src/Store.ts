@@ -170,7 +170,10 @@ export default class Store<T extends State, U extends SelectorsBase<T>> {
 
         this.componentInstanceToUpdatesMap.set(componentInstance, {
           ...this.componentInstanceToUpdatesMap.get(componentInstance),
-          [name]: 'effect' in subStateOrStateGetterOrSelector ? subStateOrStateGetterOrSelector.value : subStateOrStateGetterOrSelector
+          [name]:
+            'effect' in subStateOrStateGetterOrSelector
+              ? subStateOrStateGetterOrSelector.value
+              : subStateOrStateGetterOrSelector
         });
       },
       {

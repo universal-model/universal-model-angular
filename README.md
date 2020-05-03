@@ -237,7 +237,7 @@ export default class AComponent {
 ## View
 app.component.ts
 
-```angular2
+```ts
 import { Component } from '@angular/core';
 
 @Component({

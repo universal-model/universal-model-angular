@@ -237,7 +237,7 @@ export default class AComponent {
 ## View
 app.component.ts
 
-```ts
+```angular2
 import { Component } from '@angular/core';
 
 @Component({
@@ -253,7 +253,7 @@ export class AppComponent {}
 
 header.component.ts
 
-```ts
+```angular2
 import { Component } from '@angular/core';
 import initialHeaderState from '@/header/model/state/initialHeaderState';
 import changeUserName from '@/header/model/actions/changeUserName';
@@ -283,7 +283,7 @@ export class HeaderComponent {
 
 todolist.component.ts
 
-```ts
+```angular2
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import initialTodosState, { Todo } from '@/todolist/model/state/initialTodosState';
 import toggleShouldShowOnlyDoneTodos from '@/todolist/model/actions/toggleShouldShowOnlyUnDoneTodos';

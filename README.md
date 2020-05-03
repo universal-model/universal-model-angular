@@ -253,7 +253,7 @@ export class AppComponent {}
 
 header.component.ts
 
-```angular2
+```ts
 import { Component } from '@angular/core';
 import initialHeaderState from '@/header/model/state/initialHeaderState';
 import changeUserName from '@/header/model/actions/changeUserName';
@@ -283,7 +283,7 @@ export class HeaderComponent {
 
 todolist.component.ts
 
-```angular2
+```ts
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import initialTodosState, { Todo } from '@/todolist/model/state/initialTodosState';
 import toggleShouldShowOnlyDoneTodos from '@/todolist/model/actions/toggleShouldShowOnlyUnDoneTodos';

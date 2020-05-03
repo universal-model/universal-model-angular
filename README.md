@@ -77,28 +77,34 @@ state (or sub-stores)
 
 ### Common API (Angular/React/Svelte/Vue)
 
-    createSubState(subState);
-    const store = createStore(initialState, combineSelectors(selectors))
-    
-    const { componentAState, componentBState } = store.getState();
-    const { selector1, selector2 } = store.getSelectors();
-    const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
+```ts
+createSubState(subState);
+const store = createStore(initialState, combineSelectors(selectors))
+
+const { componentAState, componentBState } = store.getState();
+const { selector1, selector2 } = store.getSelectors();
+const [{ componentAState }, { selector1, selector2 }] = store.getStateAndSelectors();
+```
 
 ### Angular specific API
-    
-    useState(this, { componentAState, componentBStateProp1: () => componentBState.prop1 });
-    useSelectors(this, { selector1, selector2 });
-    useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
+
+```ts
+useState(this, { componentAState, componentBStateProp1: () => componentBState.prop1 });
+useSelectors(this, { selector1, selector2 });
+useStateAndSelectors(this, { componentAState }, { selector1, selector2 });
+```
 
 [Detailed API documentation](https://github.com/universal-model/universal-model-angular/blob/master/docs/API.md)
 
 ## API Examples
 **Create initial states**
 
-    const initialComponentAState = {
-      prop1: 0,
-      prop2: 0
-    };
+```ts
+const initialComponentAState = {
+  prop1: 0,
+  prop2: 0
+};
+```
     
 **Create selectors**
 
@@ -106,240 +112,260 @@ When using foreign state inside selectors, prefer creating foreign state selecto
 state through them instead of directly accessing foreign state inside selector. This will ensure  better
 encapsulation of component state.
 
-    const createComponentASelectors = <T extends State>() => ({
-      selector1: (state: State) => state.componentAState.prop1  + state.componentAState.prop2
-      selector2: (state: State) => {
-        const { componentBSelector1, componentBSelector2 } = createComponentBSelectors<State>();
-        return state.componentAState.prop1 + componentBSelector1(state) + componentBSelector2(state);
-      }
-    });
+```ts
+const createComponentASelectors = <T extends State>() => ({
+  selector1: (state: State) => state.componentAState.prop1  + state.componentAState.prop2
+  selector2: (state: State) => {
+    const { componentBSelector1, componentBSelector2 } = createComponentBSelectors<State>();
+    return state.componentAState.prop1 + componentBSelector1(state) + componentBSelector2(state);
+  }
+});
+```
 
 **Create and export store in store.ts:**
 
 combineSelectors() checks if there are duplicate keys in selectors and will throw an error telling which key was duplicated.
 By using combineSelectors you can keep your selector names short and only namespace them if needed.
-    
-    const initialState = {
-      componentAState: createSubState(initialComponentAState),
-      componentBState: createSubState(initialComponentBState)
-    };
-    
-    export type State = typeof initialState;
-    
-    const componentAStateSelectors = createComponentAStateSelectors<State>();
-    const componentBStateSelectors = createComponentBStateSelectors<State>();
-    
-    const selectors = combineSelectors<State, typeof componentAStateSelectors, typeof componentBStateSelectors>(
-      componentAStateSelectors,
-      componentBStateSelectors
-    );
-    
-    export default createStore<State, typeof selectors>(initialState, selectors);
+
+```ts    
+const initialState = {
+  componentAState: createSubState(initialComponentAState),
+  componentBState: createSubState(initialComponentBState)
+};
+
+export type State = typeof initialState;
+
+const componentAStateSelectors = createComponentAStateSelectors<State>();
+const componentBStateSelectors = createComponentBStateSelectors<State>();
+
+const selectors = combineSelectors<State, typeof componentAStateSelectors, typeof componentBStateSelectors>(
+  componentAStateSelectors,
+  componentBStateSelectors
+);
+
+export default createStore<State, typeof selectors>(initialState, selectors);
+```
     
 in large projects you should have sub-stores for components and these sub-store are combined 
 together to a single store in store.js:
 
 **componentBSubStore.js**
 
-    export const initialComponentsBState = { 
-      componentBState: createSubState(initialComponentBState),
-      componentB_1State: createSubState(initialComponentB_1State),
-      componentB_2State: createSubState(initialComponentB_2State),
-    };
-    
-    const componentBStateSelectors = createComponentBStateSelectors<State>();
-    const componentB_1StateSelectors = createComponentB_1StateSelectors<State>();
-    const componentB_2StateSelectors = createComponentB_2Selectors<State>('componentB');
-    
-    const componentsBStateSelectors = combineSelectors<State, typeof componentBStateSelectors, typeof componentB_1StateSelectors, typeof componentB_2StateSelectors>(
-      componentBStateSelectors,
-      componentB_1StateSelectors,
-      componentB_2StateSelectors
-    );
+```ts
+export const initialComponentsBState = { 
+  componentBState: createSubState(initialComponentBState),
+  componentB_1State: createSubState(initialComponentB_1State),
+  componentB_2State: createSubState(initialComponentB_2State),
+};
+
+const componentBStateSelectors = createComponentBStateSelectors<State>();
+const componentB_1StateSelectors = createComponentB_1StateSelectors<State>();
+const componentB_2StateSelectors = createComponentB_2Selectors<State>('componentB');
+
+const componentsBStateSelectors = combineSelectors<State, typeof componentBStateSelectors, typeof componentB_1StateSelectors, typeof componentB_2StateSelectors>(
+  componentBStateSelectors,
+  componentB_1StateSelectors,
+  componentB_2StateSelectors
+);
+```
     
 **store.js**
 
-    const initialState = {
-      ...initialComponentsAState,
-      ...initialComponentsBState,
-      .
-      ...initialComponentsNState
-    };
-          
-    export type State = typeof initialState;
-        
-    const selectors = combineSelectors<State, typeof componentsAStateSelectors, typeof componentsBStateSelectors, ... typeof componentsNStateSelectors>(
-      componentsAStateSelectors,
-      componentsBStateSelectors,
-      .
-      componentsNStateSelectors
-    );
-        
-    export default createStore<State, typeof selectors>(initialState, selectors);
+```ts
+const initialState = {
+  ...initialComponentsAState,
+  ...initialComponentsBState,
+  .
+  ...initialComponentsNState
+};
+      
+export type State = typeof initialState;
+    
+const selectors = combineSelectors<State, typeof componentsAStateSelectors, typeof componentsBStateSelectors, ... typeof componentsNStateSelectors>(
+  componentsAStateSelectors,
+  componentsBStateSelectors,
+  .
+  componentsNStateSelectors
+);
+    
+export default createStore<State, typeof selectors>(initialState, selectors);
+```
     
 **Access store in Actions**
 
 Don't modify other component's state directly inside action, but instead 
 call other component's action. This will ensure encapsulation of component's own state.
 
-    export default function changeComponentAAndBState(newAValue, newBValue) {
-      const { componentAState } = store.getState();
-      componentAState.prop1 = newAValue;
-      
-      // BAD
-      const { componentBState } = store.getState();
-      componentBState.prop1 = newBValue;
-      
-      // GOOD
-      changeComponentBState(newBValue);
-    }
+```ts
+export default function changeComponentAAndBState(newAValue, newBValue) {
+  const { componentAState } = store.getState();
+  componentAState.prop1 = newAValue;
+  
+  // BAD
+  const { componentBState } = store.getState();
+  componentBState.prop1 = newBValue;
+  
+  // GOOD
+  changeComponentBState(newBValue);
+}
+```
 
 **Use actions, state and selectors in Views (Angular Components)**
 
 Components should use only their own state and access other components' states using selectors
 provided by those components. This will ensure encapsulation of each component's state. You can also
 access foreign state with a state getter.
-    
-    export default class AComponent {
-      state: typeof initialComponentAState;
-      foreignStateProp1: number,
-      selector1: string,
-      selector2: number
-      // Action
-      changeComponentAState = changeComponentAState
-      
-      constructor() {
-        const [{ componentAState, componentBState }, { selector1, selector2 }] = store.getStateAndSelectors();
-        useStateAndSelectors(this, { state: componentAState, foreignStateProp1: () => componentBState.prop1  }, { selector1, selector2 });
-      }
-    }
+
+```ts    
+export default class AComponent {
+  state: typeof initialComponentAState;
+  foreignStateProp1: number,
+  selector1: string,
+  selector2: number
+  // Action
+  changeComponentAState = changeComponentAState
+  
+  constructor() {
+    const [{ componentAState, componentBState }, { selector1, selector2 }] = store.getStateAndSelectors();
+    useStateAndSelectors(this, { state: componentAState, foreignStateProp1: () => componentBState.prop1  }, { selector1, selector2 });
+  }
+}
+```
 
 # Example
 
 ## View
 app.component.ts
 
-    import { Component } from '@angular/core';
-    
-    @Component({
-      selector: 'app-root',
-      template: `
-        <app-header-view></app-header-view>
-        <app-todo-list-view></app-todo-list-view>
-      `,
-      styleUrls: []
-    })
-    export class AppComponent {}
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <app-header-view></app-header-view>
+    <app-todo-list-view></app-todo-list-view>
+  `,
+  styleUrls: []
+})
+export class AppComponent {}
+```
 
 header.component.ts
 
-    import { Component } from '@angular/core';
-    import initialHeaderState from '@/header/model/state/initialHeaderState';
-    import changeUserName from '@/header/model/actions/changeUserName';
-    import store from '@/store/store';
-    
-    @Component({
-      selector: 'app-header-view',
-      template: `
-        <div>
-          <h1>{{ headerText }}</h1>
-          <label for="userName">User name:</label>
-          <input #userNameInput id="userName" (change)="changeUserName(userNameInput.value)" />
-        </div>
-      `,
-      styleUrls: []
-    })
-    export class HeaderComponent {
-      headerText: string;
-      changeUserName = changeUserName;
-    
-      constructor() {
-        const { headerText } = store.getSelectors();
-        store.useSelectors(this, { headerText });
-      }
-    }
+```ts
+import { Component } from '@angular/core';
+import initialHeaderState from '@/header/model/state/initialHeaderState';
+import changeUserName from '@/header/model/actions/changeUserName';
+import store from '@/store/store';
+
+@Component({
+  selector: 'app-header-view',
+  template: `
+    <div>
+      <h1>{{ headerText }}</h1>
+      <label for="userName">User name:</label>
+      <input #userNameInput id="userName" (change)="changeUserName(userNameInput.value)" />
+    </div>
+  `,
+  styleUrls: []
+})
+export class HeaderComponent {
+  headerText: string;
+  changeUserName = changeUserName;
+
+  constructor() {
+    const { headerText } = store.getSelectors();
+    store.useSelectors(this, { headerText });
+  }
+}
+```
 
 todolist.component.ts
 
-    import { Component, OnDestroy, OnInit } from '@angular/core';
-    import initialTodosState, { Todo } from '@/todolist/model/state/initialTodosState';
-    import toggleShouldShowOnlyDoneTodos from '@/todolist/model/actions/toggleShouldShowOnlyUnDoneTodos';
-    import toggleIsDoneTodo from '@/todolist/model/actions/toggleIsDoneTodo';
-    import removeTodo from '@/todolist/model/actions/removeTodo';
-    import store from '@/store/store';
-    import fetchTodos from '@/todolist/model/actions/fetchTodos';
-    import todoListController from '@/todolist/controller/todoListController';
-    
-    @Component({
-      selector: 'app-todo-list-view',
-      template: `
-        <div>
-          <input
-            id="shouldShowOnlyUnDoneTodos"
-            type="checkbox"
-            [checked]="todosState.shouldShowOnlyUnDoneTodos"
-            (click)="toggleShouldShowOnlyUnDoneTodos()"
-          />
-          <label for="shouldShowOnlyUnDoneTodos">Show only undone todos</label>
-          <div *ngIf="todosState.isFetchingTodos">Fetching todos...</div>
-          <div *ngIf="todosState.hasTodosFetchFailure; else todoList">Failed to fetch todos</div>
-          <ng-template #todoList>
-            <ul>
-              <li *ngFor="let todo of shownTodos">
-                <input id="todo.name" type="checkbox" [checked]="todo.isDone" (click)="toggleIsDoneTodo(todo)" />
-                <label for="todo.name">{{ userName }}: {{ todo.name }}</label>
-                <button (click)="removeTodo(todo)">Remove</button>
-              </li>
-            </ul>
-          </ng-template>
-        </div>
-      `,
-      styleUrls: []
-    })
-    export class TodoListComponent implements OnInit, OnDestroy {
-      todosState: typeof initialTodosState;
-      shownTodos: Todo[];
-      userName: string;
-      toggleShouldShowOnlyUnDoneTodos = toggleShouldShowOnlyDoneTodos;
-      toggleIsDoneTodo = toggleIsDoneTodo;
-      removeTodo = removeTodo;
-    
-      constructor() {
-        const [{ todosState }, { shownTodos, userName }] = store.getStateAndSelectors();
-        store.useStateAndSelectors(this, { todosState }, { shownTodos, userName });
-      }
-    
-      ngOnInit(): void {
-        // noinspection JSIgnoredPromiseFromCall
-        fetchTodos();
-        document.addEventListener('keydown', todoListController.handleKeyDown);
-      }
-    
-      ngOnDestroy(): void {
-        document.removeEventListener('keydown', todoListController.handleKeyDown);
-      }
-    }
+```ts
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import initialTodosState, { Todo } from '@/todolist/model/state/initialTodosState';
+import toggleShouldShowOnlyDoneTodos from '@/todolist/model/actions/toggleShouldShowOnlyUnDoneTodos';
+import toggleIsDoneTodo from '@/todolist/model/actions/toggleIsDoneTodo';
+import removeTodo from '@/todolist/model/actions/removeTodo';
+import store from '@/store/store';
+import fetchTodos from '@/todolist/model/actions/fetchTodos';
+import todoListController from '@/todolist/controller/todoListController';
+
+@Component({
+  selector: 'app-todo-list-view',
+  template: `
+    <div>
+      <input
+        id="shouldShowOnlyUnDoneTodos"
+        type="checkbox"
+        [checked]="todosState.shouldShowOnlyUnDoneTodos"
+        (click)="toggleShouldShowOnlyUnDoneTodos()"
+      />
+      <label for="shouldShowOnlyUnDoneTodos">Show only undone todos</label>
+      <div *ngIf="todosState.isFetchingTodos">Fetching todos...</div>
+      <div *ngIf="todosState.hasTodosFetchFailure; else todoList">Failed to fetch todos</div>
+      <ng-template #todoList>
+        <ul>
+          <li *ngFor="let todo of shownTodos">
+            <input id="todo.name" type="checkbox" [checked]="todo.isDone" (click)="toggleIsDoneTodo(todo)" />
+            <label for="todo.name">{{ userName }}: {{ todo.name }}</label>
+            <button (click)="removeTodo(todo)">Remove</button>
+          </li>
+        </ul>
+      </ng-template>
+    </div>
+  `,
+  styleUrls: []
+})
+export class TodoListComponent implements OnInit, OnDestroy {
+  todosState: typeof initialTodosState;
+  shownTodos: Todo[];
+  userName: string;
+  toggleShouldShowOnlyUnDoneTodos = toggleShouldShowOnlyDoneTodos;
+  toggleIsDoneTodo = toggleIsDoneTodo;
+  removeTodo = removeTodo;
+
+  constructor() {
+    const [{ todosState }, { shownTodos, userName }] = store.getStateAndSelectors();
+    store.useStateAndSelectors(this, { todosState }, { shownTodos, userName });
+  }
+
+  ngOnInit(): void {
+    // noinspection JSIgnoredPromiseFromCall
+    fetchTodos();
+    document.addEventListener('keydown', todoListController.handleKeyDown);
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('keydown', todoListController.handleKeyDown);
+  }
+}
+```
 
 ## Controller
 
 todoListController.ts
 
-    import addTodo from "@/todolist/model/actions/addTodo";
-    import removeAllTodos from "@/todolist/model/actions/removeAllTodos";
+```ts
+import addTodo from "@/todolist/model/actions/addTodo";
+import removeAllTodos from "@/todolist/model/actions/removeAllTodos";
 
-    export default {
-      handleKeyDown(keyboardEvent: KeyboardEvent): void {
-        if (keyboardEvent.code === 'KeyA' && keyboardEvent.ctrlKey) {
-          keyboardEvent.stopPropagation();
-          keyboardEvent.preventDefault();
-          addTodo();
-        } else if (keyboardEvent.code === 'KeyR' && keyboardEvent.ctrlKey) {
-           keyboardEvent.stopPropagation();
-           keyboardEvent.preventDefault();
-          removeAllTodos();
-        }
-      }
-    };
+export default {
+  handleKeyDown(keyboardEvent: KeyboardEvent): void {
+    if (keyboardEvent.code === 'KeyA' && keyboardEvent.ctrlKey) {
+      keyboardEvent.stopPropagation();
+      keyboardEvent.preventDefault();
+      addTodo();
+    } else if (keyboardEvent.code === 'KeyR' && keyboardEvent.ctrlKey) {
+       keyboardEvent.stopPropagation();
+       keyboardEvent.preventDefault();
+      removeAllTodos();
+    }
+  }
+};
+```
     
 ## Model
 
@@ -347,28 +373,30 @@ todoListController.ts
 
 store.ts
 
-     import { combineSelectors, createStore, createSubState } from 'universal-model-angular';
-     import initialHeaderState from '@/header/model/state/initialHeaderState';
-     import initialTodoListState from '@/todolist/model/state/initialTodosState';
-     import createTodoListStateSelectors from '@/todolist/model/state/createTodoListStateSelectors';
-     import createHeaderStateSelectors from '@/header/model/state/createHeaderStateSelectors';
-     
-     const initialState = {
-       headerState: createSubState(initialHeaderState),
-       todosState: createSubState(initialTodoListState)
-     };
-     
-     export type State = typeof initialState;
-     
-     const headerStateSelectors =  createHeaderStateSelectors<State>();
-     const todoListStateSelectors = createTodoListStateSelectors<State>();
-     
-     const selectors = combineSelectors<State, typeof headerStateSelectors, typeof todoListStateSelectors>(
-      headerStateSelectors,
-      todoListStateSelectors 
-     );
-     
-     export default createStore<State, typeof selectors>(initialState, selectors);
+```ts
+import { combineSelectors, createStore, createSubState } from 'universal-model-angular';
+import initialHeaderState from '@/header/model/state/initialHeaderState';
+import initialTodoListState from '@/todolist/model/state/initialTodosState';
+import createTodoListStateSelectors from '@/todolist/model/state/createTodoListStateSelectors';
+import createHeaderStateSelectors from '@/header/model/state/createHeaderStateSelectors';
+
+const initialState = {
+headerState: createSubState(initialHeaderState),
+todosState: createSubState(initialTodoListState)
+};
+
+export type State = typeof initialState;
+
+const headerStateSelectors =  createHeaderStateSelectors<State>();
+const todoListStateSelectors = createTodoListStateSelectors<State>();
+
+const selectors = combineSelectors<State, typeof headerStateSelectors, typeof todoListStateSelectors>(
+headerStateSelectors,
+todoListStateSelectors 
+);
+
+export default createStore<State, typeof selectors>(initialState, selectors);
+```
 
 ### State
 
@@ -376,180 +404,208 @@ store.ts
 
 initialHeaderState.ts
 
-    export default {
-      userName: 'John'
-    };
+```ts
+export default {
+  userName: 'John'
+};
+```
 
 initialTodoListState.ts
 
-    export interface Todo {
-      id: number,
-      name: string;
-      isDone: boolean;
-    }
+```ts
+export interface Todo {
+  id: number,
+  name: string;
+  isDone: boolean;
+}
 
-    export default {
-      todos: [] as Todo[],
-      shouldShowOnlyUnDoneTodos: false,
-      isFetchingTodos: false,
-      hasTodosFetchFailure: false
-    };
+export default {
+  todos: [] as Todo[],
+  shouldShowOnlyUnDoneTodos: false,
+  isFetchingTodos: false,
+  hasTodosFetchFailure: false
+};
+```
 
 #### State selectors
 
 createHeaderStateSelectors.ts
 
-    import { State } from '@/store/store';
-    
-    const createHeaderStateSelectors = <T extends State>() => ({
-      userName: (state: T) => state.headerState.userName,
-      headerText: (state: T) => {
-        const {
-          todoCount: selectTodoCount,
-          unDoneTodoCount: selectUnDoneTodoCount
-        } = createTodoListStateSelectors<T>();
-      
-        return `${state.headerState.userName} (${selectUnDoneTodoCount(state)}/${selectTodoCount(state)})`;
-      }
-    });
-    
-    export default createHeaderStateSelectors;
+```ts
+import { State } from '@/store/store';
+
+const createHeaderStateSelectors = <T extends State>() => ({
+  userName: (state: T) => state.headerState.userName,
+  headerText: (state: T) => {
+    const {
+      todoCount: selectTodoCount,
+      unDoneTodoCount: selectUnDoneTodoCount
+    } = createTodoListStateSelectors<T>();
+  
+    return `${state.headerState.userName} (${selectUnDoneTodoCount(state)}/${selectTodoCount(state)})`;
+  }
+});
+
+export default createHeaderStateSelectors;
+```
 
 createTodoListStateSelectors.ts
 
-    import { State } from '@/store/store';
-    import { Todo } from '@/todolist/model/state/initialTodoListState';
+```ts
+import { State } from '@/store/store';
+import { Todo } from '@/todolist/model/state/initialTodoListState';
 
-    const createTodoListStateSelectors = <T extends State>() => ({
-      shownTodos: (state: T) =>
-        state.todosState.todos.filter(
-          (todo: Todo) =>
-            (state.todosState.shouldShowOnlyUnDoneTodos && !todo.isDone) ||
-            !state.todosState.shouldShowOnlyUnDoneTodos
-        ),
-        todoCount: (state: T) => state.todosState.todos.length,
-        unDoneTodoCount: (state: T) => state.todosState.todos.filter((todo: Todo) => !todo.isDone).length
-    });
+const createTodoListStateSelectors = <T extends State>() => ({
+  shownTodos: (state: T) =>
+    state.todosState.todos.filter(
+      (todo: Todo) =>
+        (state.todosState.shouldShowOnlyUnDoneTodos && !todo.isDone) ||
+        !state.todosState.shouldShowOnlyUnDoneTodos
+    ),
+    todoCount: (state: T) => state.todosState.todos.length,
+    unDoneTodoCount: (state: T) => state.todosState.todos.filter((todo: Todo) => !todo.isDone).length
+});
 
-    export default createTodoListStateSelectors;
+export default createTodoListStateSelectors;
+```
 
 ### Service
 
 ITodoService.ts
 
-    import { Todo } from '@/todolist/model/state/initialTodoListState';
+```ts
+import { Todo } from '@/todolist/model/state/initialTodoListState';
 
-    export interface ITodoService {
-      tryFetchTodos(): Promise<Todo[]>;
-    }
+export interface ITodoService {
+  tryFetchTodos(): Promise<Todo[]>;
+}
+```
 
 FakeTodoService.ts
 
-    import { ITodoService } from '@/todolist/model/services/ITodoService';
-    import { Todo } from '@/todolist/model/state/initialTodoListState';
-    import Constants from '@/Constants';
-    
-    export default class FakeTodoService implements ITodoService {
-      tryFetchTodos(): Promise<Todo[]> {
-        return new Promise<Todo[]>((resolve: (todo: Todo[]) => void, reject: () => void) => {
-          setTimeout(() => {
-            if (Math.random() < 0.95) {
-              resolve([
-                { id: 1, name: 'first todo', isDone: true },
-                { id: 2, name: 'second todo', isDone: false }
-              ]);
-            } else {
-              reject();
-            }
-          }, Constants.FAKE_SERVICE_LATENCY_IN_MILLIS);
-        });
-      }
-    }
+```ts
+import { ITodoService } from '@/todolist/model/services/ITodoService';
+import { Todo } from '@/todolist/model/state/initialTodoListState';
+import Constants from '@/Constants';
+
+export default class FakeTodoService implements ITodoService {
+  tryFetchTodos(): Promise<Todo[]> {
+    return new Promise<Todo[]>((resolve: (todo: Todo[]) => void, reject: () => void) => {
+      setTimeout(() => {
+        if (Math.random() < 0.95) {
+          resolve([
+            { id: 1, name: 'first todo', isDone: true },
+            { id: 2, name: 'second todo', isDone: false }
+          ]);
+        } else {
+          reject();
+        }
+      }, Constants.FAKE_SERVICE_LATENCY_IN_MILLIS);
+    });
+  }
+}
+```
 
 todoService.ts
 
-    import FakeTodoService from "@/todolist/model/services/FakeTodoService";
+```ts
+import FakeTodoService from "@/todolist/model/services/FakeTodoService";
 
-    export default new FakeTodoService();
+export default new FakeTodoService();
+```
 
 ### Actions
 
 changeUserName.ts
 
-    import store from '@/store/store';
-    
-    export default function changeUserName(newUserName: string): void {
-      const { headerState } = store.getState();
-      headerState.userName = newUserName;
-    }
+```ts
+import store from '@/store/store';
+
+export default function changeUserName(newUserName: string): void {
+  const { headerState } = store.getState();
+  headerState.userName = newUserName;
+}
+```
 
 addTodo.ts
 
-    import store from '@/store/store';
-    
-    let id = 3;
-    
-    export default function addTodo(): void {
-      const { todosState } = store.getState();
-      todosState.todos.push({ id, name: 'new todo', isDone: false });
-      id++;
-    }
+```ts
+import store from '@/store/store';
+
+let id = 3;
+
+export default function addTodo(): void {
+  const { todosState } = store.getState();
+  todosState.todos.push({ id, name: 'new todo', isDone: false });
+  id++;
+}
+```
 
 removeTodo.ts
 
-    import store from '@/store/store';
-    import { Todo } from '@/todolist/model/state/initialTodoListState';
+```
+import store from '@/store/store';
+import { Todo } from '@/todolist/model/state/initialTodoListState';
 
-    export default function removeTodo(todoToRemove: Todo): void {
-      const { todosState } = store.getState();
-      todosState.todos = todosState.todos.filter((todo: Todo) => todo !== todoToRemove);
-    }
+export default function removeTodo(todoToRemove: Todo): void {
+  const { todosState } = store.getState();
+  todosState.todos = todosState.todos.filter((todo: Todo) => todo !== todoToRemove);
+}
+```
 
 removeAllTodos.ts
 
-    import store from '@/store/store';
+```ts
+import store from '@/store/store';
 
-    export default function removeAllTodos(): void {
-      const { todosState } = store.getState();
-      todosState.todos = [];
-    }
+export default function removeAllTodos(): void {
+  const { todosState } = store.getState();
+  todosState.todos = [];
+}
+```
 
 toggleIsDoneTodo.ts
 
-    import { Todo } from '@/todolist/model/state/initialTodoListState';
+```ts
+import { Todo } from '@/todolist/model/state/initialTodoListState';
 
-    export default function toggleIsDoneTodo(todo: Todo): void {
-      todo.isDone = !todo.isDone;
-    }
+export default function toggleIsDoneTodo(todo: Todo): void {
+  todo.isDone = !todo.isDone;
+}
+```
 
 toggleShouldShowOnlyUnDoneTodos.ts
 
-    import store from '@/store/store';
+```ts
+import store from '@/store/store';
 
-    export default function toggleShouldShowOnlyUnDoneTodos(): void {
-      const { todosState } = store.getState();
-      todosState.shouldShowOnlyUnDoneTodos = !todosState.shouldShowOnlyUnDoneTodos;
-    }
+export default function toggleShouldShowOnlyUnDoneTodos(): void {
+  const { todosState } = store.getState();
+  todosState.shouldShowOnlyUnDoneTodos = !todosState.shouldShowOnlyUnDoneTodos;
+}
+```
 
 fetchTodos.ts
 
-    import store from '@/store/store';
-    import todoService from '@/todolist/model/services/todoService';
+```ts
+import store from '@/store/store';
+import todoService from '@/todolist/model/services/todoService';
 
-    export default async function fetchTodos(): Promise<void> {
-      const { todosState } = store.getState();
+export default async function fetchTodos(): Promise<void> {
+  const { todosState } = store.getState();
 
-      todosState.isFetchingTodos = true;
-      todosState.hasTodosFetchFailure = false;
+  todosState.isFetchingTodos = true;
+  todosState.hasTodosFetchFailure = false;
 
-      try {
-        todosState.todos = await todoService.tryFetchTodos();
-      } catch (error) {
-        todosState.hasTodosFetchFailure = true;
-      }
+  try {
+    todosState.todos = await todoService.tryFetchTodos();
+  } catch (error) {
+    todosState.hasTodosFetchFailure = true;
+  }
 
-      todosState.isFetchingTodos = false;
-    }
+  todosState.isFetchingTodos = false;
+}
+```
 
 ### Full Examples
 

@@ -282,6 +282,14 @@ export class HeaderComponent {
 ```
 
 todolist.component.ts
+```angular2html
+<div>
+  <h1>{{ headerText }}</h1>
+  <label for="userName">User name:</label>
+  <input #userNameInput id="userName" (change)="changeUserName(userNameInput.value)" />
+</div>
+```
+
 
 ```ts
 import { Component, OnDestroy, OnInit } from '@angular/core';

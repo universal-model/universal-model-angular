@@ -243,12 +243,8 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-root',
   template: `
-```
-```angular2html
     <app-header-view></app-header-view>
     <app-todo-list-view></app-todo-list-view>
-```
-```ts
   `,
   styleUrls: []
 })
